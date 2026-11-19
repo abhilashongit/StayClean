@@ -254,9 +254,9 @@ hr.sep{border:0;border-top:1px solid var(--line)}
 #sliver{filter:drop-shadow(0 0 6px rgba(255,255,255,.9))}
 .bsone .bs-big{font-size:clamp(26px,3.4vw,40px);font-weight:800;letter-spacing:-.04em;line-height:1.15;margin:22px 0 28px;color:#fff;max-width:none}
 .bsone .bs-big span{color:var(--mut)}
-.bs-row{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;border-top:1px solid var(--line);padding-top:24px}
+.bs-row{display:grid;grid-template-columns:repeat(3,fit-content(300px));justify-content:space-between;gap:28px;border-top:1px solid var(--line);padding-top:24px}
 .bs-i b{display:block;font-weight:800;font-size:19px;letter-spacing:-.025em;margin-bottom:4px}
-.bs-i small{font-family:var(--cap);font-weight:600;font-size:15px;color:var(--mut);line-height:1.5}
+.bs-i small{text-wrap:pretty;font-family:var(--cap);font-weight:600;font-size:15px;color:var(--mut);line-height:1.5}
 @media (max-width:860px){.bsone{padding:22px}.bs-row{grid-template-columns:1fr;gap:18px}}
 .keep{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:26px;padding-top:20px;border-top:1px solid var(--line);font-family:var(--cap);font-weight:700;font-size:14px;color:var(--mut)}
 .keep span{display:flex;align-items:center;gap:8px}
@@ -480,6 +480,8 @@ footer a:hover{color:#fff}
 }
 
 .chai{display:inline-block;margin-top:14px;font-family:var(--cap);font-weight:600;font-size:14px;color:var(--mut);border-bottom:1px solid var(--line2);padding-bottom:1px;transition:color .2s,border-color .2s}
+.q .a .chai{display:inline;width:auto;padding:0 0 1px;margin:0 0 0 2px!important;font-family:inherit;font-size:inherit;font-weight:700;letter-spacing:0;color:#fff;border-bottom:1px solid #666;white-space:normal;text-align:left}
+.q .a .chai:hover{border-color:#fff}
 .chai:hover{color:#fff;border-color:#888}
 #chaidlg .cq{display:block;width:176px;height:176px;border-radius:14px;margin:6px 0 16px;background:#fff}
 #chaidlg ul{list-style:none;margin:0 0 18px;padding:0;color:var(--mut);font-size:15.5px;line-height:1.7}
@@ -631,8 +633,8 @@ footer a:hover{color:#fff}
     </div>
     <p class="bs-big">Less than 1% of your battery, all day. <span>Even on an old one.</span></p>
     <div class="bs-row">
-      <div class="bs-i"><b>Asleep all day.</b><small>Nothing runs while you get on with your life.</small></div>
-      <div class="bs-i"><b>Awake only at night.</b><small>Like a quiet guard who steps in only when you open something it watches.</small></div>
+      <div class="bs-i"><b>Asleep all day.</b><small>It rests in the background while you get on with your life.</small></div>
+      <div class="bs-i"><b>Awake only at night.</b><small>Like a quiet guard that steps in only when you open something it watches.</small></div>
       <div class="bs-i"><b>Tested on real phones.</b><small>Tried on many different Android phones, and it stayed this light.</small></div>
     </div>
   </div>
@@ -712,6 +714,7 @@ footer a:hover{color:#fff}
     <div class="q"><button type="button"><span>Can I still switch it off?</span><i></i></button><div class="a"><div><p>It is built as a speed bump for a weak moment, not a prison. Some settings are held shut at night, and it never locks you out of your own phone. A determined person can still remove it by day. That is the honest trade-off.</p></div></div></div>
     <div class="q"><button type="button"><span>Why does Android warn me?</span><i></i></button><div class="a"><div><p>It uses the Accessibility permission to see which app is open, and it is installed outside the Play Store. Android and Play Protect are cautious about that combination. The source and a checksum are published so you can verify it.</p></div></div></div>
     <div class="q"><button type="button"><span>Which sites and apps does it guard?</span><i></i></button><div class="a"><div><p>Swiggy and Zomato overnight, Instagram and X at night if you switch on the Night lock, Instagram pacing all day, and adult sites in Chrome and other popular browsers.</p></div></div></div>
+    <div class="q"><button type="button"><span>Why not iPhone?</span><i></i></button><div class="a"><div><p>Stay Clean is meant to stay free forever, and that has been the goal from the very beginning. Apple charges $99 a year for a developer account, and installing apps outside the App Store is difficult for most iPhone users. We do not want to give you a cumbersome experience, so Stay Clean stays Android only until we can raise enough to support it every year, or the founder can afford the fee. If you would like to help, all we ask is a one-time ₹10. Nothing more. Little by little, it adds up to what we need. <button type="button" class="chai opench" style="margin:0 0 0 4px">Buy me a chai · ₹10</button></p></div></div></div>
     <div class="q"><button type="button"><span>Is it affiliated with those companies?</span><i></i></button><div class="a"><div><p>No. Stay Clean is an independent project and is not affiliated with or endorsed by Swiggy, Zomato, Instagram, X, Google or Meta.</p></div></div></div>
   </div>
 </div></section>
@@ -1067,8 +1070,8 @@ $('.q').classList.add('open');
 
 
 /* chai */
-(()=>{const d=$('#chaidlg'),o=$('#openchai');if(!d||!o)return;
-o.addEventListener('click',()=>{try{d.showModal()}catch(e){d.setAttribute('open','')}});
+(()=>{const d=$('#chaidlg');if(!d)return;
+$$('#openchai,.opench').forEach(o=>o.addEventListener('click',e=>{e.stopPropagation();try{d.showModal()}catch(err){d.setAttribute('open','')}}));
 $('#chaix').addEventListener('click',()=>d.close());
 d.addEventListener('click',e=>{if(e.target===d)d.close()});})();
 /* idea box */
