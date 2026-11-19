@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script>document.documentElement.classList.add('js');try{if(!/nointro/.test(location.search)&&!location.hash&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('intro')}catch(e){}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Stay Clean: quiet nights, clear mornings</title>
@@ -127,6 +128,85 @@ h1{font-weight:800;font-size:clamp(40px,6vw,76px);line-height:.98;letter-spacing
 .timer{position:absolute;right:12px;bottom:26px;display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.7);border:1px solid #2a2a2a;border-radius:999px;padding:5px 10px 5px 6px;font-size:11px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums;z-index:4}
 .timer svg{width:20px;height:20px;transform:rotate(-90deg)}
 .timer circle{fill:none;stroke-width:3}
+
+/* reels-style feed (generic, original art) */
+.feed{padding:0!important;background:#000}
+.reels{position:absolute;inset:0;transition:transform .5s cubic-bezier(.7,0,.2,1)}
+.reel{position:absolute;left:0;right:0;height:100%;overflow:hidden}
+.reel .art{position:absolute;inset:0}
+.reel .art svg{position:absolute;inset:0;width:100%;height:100%}
+.reel .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.4),transparent 20%,transparent 52%,rgba(0,0,0,.82))}
+.ftabs{position:absolute;top:34px;left:0;right:0;display:flex;justify-content:center;gap:16px;z-index:5;font-size:12px;font-weight:600;color:rgba(255,255,255,.6);pointer-events:none}
+.ftabs b{color:#fff;font-weight:700;border-bottom:2px solid #fff;padding-bottom:2px}
+.rail{position:absolute;right:9px;bottom:70px;display:flex;flex-direction:column;align-items:center;gap:14px;color:#fff;font-size:10px;font-weight:600}
+.rail div{display:flex;flex-direction:column;align-items:center;gap:2px}
+.rail svg{width:25px;height:25px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rail .ht.on svg{fill:#ff3b5c;stroke:#ff3b5c;animation:hpop .5s var(--ease)}
+@keyframes hpop{0%{transform:scale(.6)}50%{transform:scale(1.35)}100%{transform:scale(1)}}
+.meta{position:absolute;left:12px;right:58px;bottom:20px;color:#fff}
+.meta .u{display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px}
+.meta .av{width:26px;height:26px;border-radius:50%;border:1.5px solid #fff;flex:none}
+.meta .fl{border:1px solid rgba(255,255,255,.85);border-radius:6px;padding:1px 7px;font-size:10px;font-weight:600}
+.meta p{font-size:11.5px;margin:7px 0 6px;line-height:1.35;font-weight:400}
+.meta .snd{font-size:10px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bigheart{position:absolute;left:50%;top:44%;width:92px;height:92px;margin:-46px 0 0 -46px;opacity:0;pointer-events:none;fill:#ff3b5c;filter:drop-shadow(0 6px 18px rgba(0,0,0,.4))}
+.bigheart.go{animation:bheart .8s var(--ease)}
+@keyframes bheart{0%{opacity:0;transform:scale(.4)}25%{opacity:1;transform:scale(1.15)}60%{opacity:1;transform:scale(.98)}100%{opacity:0;transform:scale(1.1)}}
+
+/* intro loader */
+#intro{position:fixed;inset:0;z-index:300;background:#000;color:#fff;display:none;flex-direction:column;justify-content:space-between;padding:26px clamp(20px,5vw,56px) 30px;transition:transform .95s cubic-bezier(.76,0,.24,1);cursor:pointer;will-change:transform}
+html.intro #intro{display:flex;animation:introfail .01s 8s forwards}
+@keyframes introfail{to{visibility:hidden}}
+#intro.out{transform:translateY(-101%)}
+.in-top{display:flex;justify-content:space-between;align-items:center;font-family:var(--cap);font-weight:700;font-size:14px;color:var(--mut)}
+.in-brand{display:flex;align-items:center;gap:10px;color:#fff;font-family:var(--main);font-weight:800;font-size:17px;letter-spacing:-.02em}
+.in-brand i{width:18px;height:18px;border-radius:50%;border:2.5px solid #fff;display:block}
+.in-mid{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center}
+.in-num{display:flex;align-items:baseline;gap:clamp(10px,2vw,24px);transition:opacity .5s,transform .7s cubic-bezier(.7,0,.2,1)}
+.in-num b{font-weight:800;font-size:clamp(120px,24vw,320px);line-height:.85;letter-spacing:-.07em;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff 25%,#6f6f6f);-webkit-background-clip:text;background-clip:text;color:transparent}
+.in-num span{font-weight:800;font-size:clamp(30px,6vw,84px);letter-spacing:-.04em;color:#9a9a9a}
+.in-cap{font-family:var(--cap);font-weight:700;font-size:clamp(17px,2.1vw,24px);line-height:1.4;color:var(--mut);max-width:24em;margin-top:clamp(14px,2vw,26px);transition:opacity .5s,transform .7s cubic-bezier(.7,0,.2,1)}
+.in-final{position:absolute;left:0;right:0;top:50%;transform:translateY(-30%);opacity:0;font-weight:800;font-size:clamp(38px,7.4vw,104px);line-height:1;letter-spacing:-.055em;max-width:9em;transition:opacity .6s .35s,transform .8s .35s cubic-bezier(.2,.7,.2,1);margin:0}
+#intro.p2 .in-num,#intro.p2 .in-cap{opacity:0;transform:translateY(-24px);transition-duration:.3s}
+#intro.p2 .in-final{opacity:1;transform:translateY(-50%)}
+.in-bot{display:flex;align-items:center;gap:24px;font-family:var(--cap);font-weight:600;font-size:13px;color:var(--dim)}
+.in-bot span{flex:none;max-width:60%}
+.in-bar{flex:1;height:2px;background:#1c1c1c;border-radius:2px;overflow:hidden}
+.in-bar i{display:block;height:100%;width:100%;background:#fff;transform:scaleX(0);transform-origin:left}
+html.intro,html.intro body{overflow:hidden}
+/* hero holds until the curtain lifts */
+html.intro .hero .rv{opacity:0!important;transform:translateY(26px)!important;transition:none!important}
+/* scroll progress */
+#sp{position:fixed;left:0;top:0;height:2px;width:100%;background:#fff;transform:scaleX(0);transform-origin:left;z-index:120;pointer-events:none;opacity:.85}
+/* word reveal */
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.14em;margin-bottom:-.14em}
+.wi{display:inline-block;transform:translateY(108%);transition:transform .9s var(--ease);transition-delay:calc(var(--i)*65ms)}
+.wsplit.go .wi{transform:none}
+html:not(.js) .wi{transform:none}
+/* marquee */
+.marq{border-block:1px solid var(--line);overflow:hidden;padding:18px 0;margin-top:34px;background:#030303}
+.mq{display:flex;gap:0;width:max-content;will-change:transform;font-weight:800;font-size:clamp(22px,3.2vw,40px);letter-spacing:-.04em;color:#e9e9e9}
+.mq span{display:flex;align-items:center;gap:26px;padding-right:26px;white-space:nowrap}
+.mq span::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok);flex:none}
+.mq em{font-style:normal;color:#7d7d7d}
+/* pinned year counter */
+#year{position:relative}
+.ytall{height:280vh;position:relative}
+.ysticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;overflow:hidden;padding-top:64px;box-sizing:border-box}
+.yin{}
+.ybig{display:flex;align-items:baseline;gap:18px;margin:6px 0 4px}
+.ybig b{font-weight:800;font-size:clamp(96px,15vw,190px);line-height:.88;letter-spacing:-.07em;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff 25%,#6f6f6f);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ybig span{font-weight:800;font-size:clamp(28px,5vw,68px);letter-spacing:-.04em;color:#9a9a9a}
+.ycap{font-size:clamp(18px,2vw,23px);color:var(--mut);max-width:30em;margin:6px 0 18px;line-height:1.45}
+.ychips{display:flex;gap:8px;margin-bottom:22px}
+.ydots{display:grid;grid-template-columns:repeat(31,1fr);gap:clamp(3px,.5vw,6px);max-width:900px}
+.ydots i{aspect-ratio:1;border-radius:50%;background:#171717;transition:background .25s,box-shadow .25s,transform .25s}
+.ydots i.x{visibility:hidden}
+.ydots i.on{background:#fff;box-shadow:0 0 10px rgba(255,255,255,.55)}
+.ysrc{font-family:var(--cap);font-weight:600;font-size:13px;color:var(--dim);margin-top:16px;max-width:46em}
+.ysrc a{color:var(--mut);border-bottom:1px solid #444}
+@media (max-width:760px){.ytall{height:250vh}.ydots{grid-template-columns:repeat(31,1fr)}}
+@media (prefers-reduced-motion:reduce){.ytall{height:auto}.ysticky{position:static;height:auto;padding:80px 0}}
 /* browser */
 .browser{background:#0e0e10;padding:44px 12px 12px}
 .addr{display:flex;align-items:center;gap:8px;height:38px;border-radius:19px;background:#1b1b1f;padding:0 14px;font-size:12px;color:#d9d9d9;margin-top:6px}
@@ -491,7 +571,18 @@ footer a:hover{color:#fff}
 </style>
 </head>
 <body>
-<script>document.documentElement.classList.add('js')</script>
+<div id="intro" aria-hidden="true">
+  <div class="in-top"><span class="in-brand"><i></i>Stay Clean</span><span class="in-skip">Tap to skip</span></div>
+  <div class="in-mid">
+    <div class="in-num"><b id="inN">0</b><span id="inU"></span></div>
+    <p class="in-cap" id="inC"></p>
+    <p class="in-final">Stay Clean gives the nights back.</p>
+  </div>
+  <div class="in-bot"><span id="inS"></span><div class="in-bar"><i id="inB"></i></div></div>
+</div>
+<div id="sp" aria-hidden="true"></div>
+
+
 
 <nav><div class="wrap nav">
   <a href="#top" class="brand" aria-label="Stay Clean home"><i></i>Stay Clean</a>
@@ -532,6 +623,18 @@ footer a:hover{color:#fff}
     <p class="scap cap" id="scap" aria-live="polite"></p>
   </div>
 </div></header>
+
+<div class="marq" aria-hidden="true"><div class="mq" id="mq"></div></div>
+
+<section id="year"><div class="ytall" id="ytall"><div class="ysticky"><div class="wrap yin">
+  <div class="eyebrow">A year of attention</div>
+  <div class="ybig"><b id="yN">0</b><span>days</span></div>
+  <p class="ycap" id="yC"></p>
+  <div class="ychips" id="ychips"><button class="dchip on" data-w="world" type="button">World</button><button class="dchip" data-w="india" type="button">India</button></div>
+  <div class="ydots" id="ydots" aria-hidden="true"></div>
+  <p class="ysrc" id="yS"></p>
+</div></div></div></section>
+
 
 <section id="outcomes" style="padding-top:70px"><div class="wrap">
   <div class="sec-h rv"><div class="eyebrow">Outcomes</div>
@@ -827,9 +930,30 @@ const ICON={
 };
 const tile=(k,l,extra='')=>`<div class="tile" data-k="${k}"><div class="ico">${ICON[k]}</div>${l}</div>`;
 const homeHTML=()=>`<div class="view home"><div class="grid">${tile('food','Food')}${tile('chat','Chat')}${tile('pic','Photos')}${tile('soc','Social')}${tile('map','Maps')}${tile('note','Notes')}${tile('web','Browser')}${tile('music','Music')}<div class="tile"><div class="ico sc"><i></i></div>Stay Clean</div></div><div class="dockline"></div><div class="tap"></div></div>`;
+const HEART='<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>';
+const CMT='<svg viewBox="0 0 24 24"><path d="M5 5h14v11H10l-5 4z"/></svg>';
+const SHR='<svg viewBox="0 0 24 24"><path d="M21 4 3 11l7 3 3 7z"/></svg>';
+const REELS=[
+ {u:'maya.moves',c:'monsoon rooftop, one take',l:'128K',m:'2,314',s:'original audio · maya.moves',bg:'linear-gradient(170deg,#0f766e,#312e81)',art:'<circle cx="215" cy="150" r="46" fill="#fde68a" opacity=".9"/><path d="M0 470 L90 330 L170 420 L250 300 L300 380 V610 H0Z" fill="#0b1b3a" opacity=".85"/>'},
+ {u:'chef.kabir',c:'2-minute midnight maggi, upgraded',l:'87K',m:'1,102',s:'Late Night Kitchen · chef.kabir',bg:'linear-gradient(170deg,#f97316,#9f1239)',art:'<ellipse cx="150" cy="360" rx="104" ry="34" fill="#1c0a0a" opacity=".55"/><path d="M60 330 Q150 470 240 330Z" fill="#fde68a"/><path d="M100 300 q15 -40 0 -70 M150 295 q15 -40 0 -70 M200 300 q15 -40 0 -70" stroke="#fff" stroke-width="5" fill="none" opacity=".5" stroke-linecap="round"/>'},
+ {u:'late.laughs',c:'me: just one more video',l:'412K',m:'9,880',s:'Trending sound · late.laughs',bg:'linear-gradient(170deg,#7c3aed,#db2777)',art:'<rect x="95" y="190" width="110" height="200" rx="18" fill="#0a0a14" opacity=".8"/><rect x="104" y="204" width="92" height="172" rx="10" fill="#e879f9" opacity=".55"/><circle cx="150" cy="290" r="26" fill="#fff" opacity=".85"/>'},
+ {u:'trail.notes',c:'Rohtang at sunrise',l:'56K',m:'640',s:'original audio · trail.notes',bg:'linear-gradient(170deg,#1d4ed8,#fb923c)',art:'<path d="M0 450 L80 300 L140 390 L210 240 L300 420 V610 H0Z" fill="#0f172a" opacity=".8"/><path d="M210 240 L236 285 L190 285Z" fill="#fff" opacity=".9"/>'},
+ {u:'dev.daily',c:'I built this in one weekend',l:'19K',m:'312',s:'lofi beats · dev.daily',bg:'linear-gradient(170deg,#065f46,#020617)',art:'<g stroke="#34d399" stroke-width="2" opacity=".5"><path d="M30 200 H270 M30 260 H270 M30 320 H270 M30 380 H270 M70 160 V420 M130 160 V420 M190 160 V420 M250 160 V420"/></g><circle cx="150" cy="290" r="38" fill="#34d399" opacity=".7"/>'},
+ {u:'riya.reads',c:'books that ate my sleep',l:'203K',m:'4,071',s:'Soft piano · riya.reads',bg:'linear-gradient(170deg,#ca8a04,#7c2d12)',art:'<rect x="70" y="300" width="160" height="26" rx="4" fill="#fef3c7" opacity=".85"/><rect x="82" y="270" width="140" height="26" rx="4" fill="#fcd34d" opacity=".85"/><rect x="62" y="240" width="150" height="26" rx="4" fill="#fb923c" opacity=".85"/>'}
+];
+const reelHTML=(r,i)=>`<div class="reel" style="top:${i*100}%"><div class="art" style="background:${r.bg}"><svg viewBox="0 0 300 610" preserveAspectRatio="xMidYMid slice">${r.art}</svg></div><div class="shade"></div><svg class="bigheart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><div class="rail"><div class="ht">${HEART}<span>${r.l}</span></div><div>${CMT}<span>${r.m}</span></div><div>${SHR}<span>Share</span></div></div><div class="meta"><div class="u"><i class="av" style="background:${r.bg}"></i>@${r.u}<span class="fl">Follow</span></div><p>${r.c}</p><div class="snd">♪ ${r.s}</div></div></div>`;
+const feedHTML=()=>`<div class="view app feed"><div class="ftabs"><span>Following</span><b>For you</b></div><div class="reels">${REELS.map(reelHTML).join('')}</div></div>`;
+async function flickFeed(my,steps,gaps,likeAt){
+  const rl=$('.reels',screen);if(!rl)return;const cards=$$('.reel',rl);
+  for(let i=1;i<=steps&&i<cards.length;i++){
+    await sleep(gaps[(i-1)%gaps.length],my);
+    rl.style.transform='translateY(-'+(i*100)+'%)';
+    if(likeAt.includes(i)){await sleep(450,my);const c=cards[i];$('.ht',c).classList.add('on');const bh=$('.bigheart',c);bh.classList.remove('go');void bh.getBoundingClientRect();bh.classList.add('go')}
+  }
+}
 const appHTML=(kind)=>kind==='food'
  ?`<div class="view app"><h4>Hungry?</h4><div class="card-sk"></div><div class="card-sk" style="height:70px"></div><div class="sk" style="width:70%"></div><div class="sk" style="width:48%"></div><div class="fakebtn">Place order</div></div>`
- :`<div class="view app"><div class="story"><i></i><i></i><i></i><i></i></div><div class="card-sk" style="height:200px"></div><div class="sk" style="width:60%"></div><div class="sk" style="width:80%"></div></div>`;
+ :feedHTML();
 const coverHTML=(silent)=>`<div class="view cover${silent?' silent':''}"><div class="ring"></div><div class="ttl">STAY CLEAN</div><div class="line"></div></div>`;
 
 let token=0;
@@ -860,13 +984,14 @@ const SCENES={
     await sleep(1100,my);$('#tg',screen).classList.add('on');await sleep(1400,my);
     set(homeHTML());clk.textContent='11:02 PM';await sleep(900,my);
     await tapOn(my,'.tile[data-k="soc"]');const a=add(appHTML('social'));a.style.setProperty('--ox',screen.style.getPropertyValue('--ox'));a.style.setProperty('--oy',screen.style.getPropertyValue('--oy'));
-    await sleep(700,my);const c=await showCover(my,nextSocial());await sleep(3000,my);
+    flickFeed(my,2,[600,650],[1]).catch(()=>{});await sleep(2200,my);const c=await showCover(my,nextSocial());await sleep(3000,my);
     await goHome(my,c);await sleep(900,my);}},
  limit:{t:'Pacing',d:'5 minutes in every 30. Enough to check in, then a gentle pause.',dur:11,
   async run(my){clk.textContent='8:15 PM';set(homeHTML());await sleep(800,my);
     await tapOn(my,'.tile[data-k="soc"]');const a=add(appHTML('social'));a.style.setProperty('--ox',screen.style.getPropertyValue('--ox'));a.style.setProperty('--oy',screen.style.getPropertyValue('--oy'));
-    const tm=add(`<div class="timer"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="#222"/><circle id="tr" cx="12" cy="12" r="9" stroke="#fff" stroke-dasharray="56.5" stroke-dashoffset="0" stroke-linecap="round"/></svg><span id="tt">5:00</span></div>`);
-    const t0=performance.now(),D=4600;
+    flickFeed(my,5,[550,650,500,600,550],[1,3,4]).catch(()=>{});
+    const tm=add(`<div class="timer" style="top:66px;bottom:auto;right:12px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="#222"/><circle id="tr" cx="12" cy="12" r="9" stroke="#fff" stroke-dasharray="56.5" stroke-dashoffset="0" stroke-linecap="round"/></svg><span id="tt">5:00</span></div>`);
+    const t0=performance.now(),D=4800;
     while(true){const p=Math.min(1,(performance.now()-t0)/D);const s=Math.round(300*(1-p));$('#tt',screen).textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');$('#tr',screen).setAttribute('stroke-dashoffset',(56.5*p).toFixed(1));if(p>=1)break;await sleep(60,my)}
     const c=await showCover(my,'Back in 24 min.');await sleep(2600,my);
     await goHome(my,c);await sleep(900,my);}},
@@ -1115,6 +1240,130 @@ $('#hash').addEventListener('click',async()=>{
   try{await navigator.clipboard.writeText(v);l.textContent='Copied ✓'}catch(e){l.textContent='Select and copy'}
   setTimeout(()=>l.textContent='Copy SHA-256',1800);
 });
+})();
+</script>
+
+<script>
+(()=>{
+const $=(q,r=document)=>r.querySelector(q),$$=(q,r=document)=>[...r.querySelectorAll(q)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const touch=matchMedia('(hover:none)').matches;
+const root=document.documentElement;
+
+/* ---------- rotating-stat intro ---------- */
+const STATS=[
+ {n:49,u:'days',cap:'a year. The average Indian’s daily social media time, added up.',src:'Esya Centre and IIM Ahmedabad, 2023 · our arithmetic'},
+ {n:36,u:'days',cap:'a year. The world’s average daily social media time, added up.',src:'DataReportal and We Are Social, 2025 · our arithmetic'},
+ {n:3,u:'×',cap:'the odds of disturbed sleep for the most frequent social media checkers.',src:'Levenson et al., 2016 · an association, not proof of cause'},
+ {n:8.3,u:'%',pre:'+',cap:'higher blood sugar response to the same dinner eaten late.',src:'Garaulet et al., 2022'},
+ {n:3,u:'weeks',cap:'of capped social media use was enough for less loneliness and depression.',src:'Hunt et al., 2018 · 143 students'}
+];
+const intro=$('#intro');
+function endIntro(){
+  if(!intro||!root.classList.contains('intro'))return;
+  intro.classList.add('out');
+  root.classList.remove('intro');
+  document.body.classList.add('ready');
+  setTimeout(()=>{intro.remove()},1100);
+}
+if(intro&&root.classList.contains('intro')){
+  let last=-1;try{last=+localStorage.getItem('sc_last')}catch(e){}
+  let k;do{k=Math.floor(Math.random()*STATS.length)}while(k===last&&STATS.length>1);
+  try{localStorage.setItem('sc_last',k)}catch(e){}
+  const S=STATS[k],dec=String(S.n).includes('.')?1:0;
+  $('#inU').textContent=S.u;$('#inC').textContent=S.cap;$('#inS').textContent=S.src;
+  const N=$('#inN'),B=$('#inB'),D=1500,t0=performance.now();
+  let done=false;
+  (function f(n){
+    const p=Math.min(1,(n-t0)/D),e=p===1?1:1-Math.pow(2,-10*p);
+    N.textContent=(S.pre||'')+(S.n*e).toFixed(dec);B.style.transform='scaleX('+p+')';
+    if(p<1&&!done)requestAnimationFrame(f);
+  })(t0);
+  const t1=setTimeout(()=>intro.classList.add('p2'),1750);
+  const t2=setTimeout(endIntro,2700);
+  intro.addEventListener('click',()=>{done=true;clearTimeout(t1);clearTimeout(t2);endIntro()});
+  addEventListener('keydown',()=>{clearTimeout(t1);clearTimeout(t2);endIntro()},{once:true});
+}else{document.body.classList.add('ready')}
+
+/* ---------- word reveals ---------- */
+function split(el,grad){
+  if(el.dataset.split)return;el.dataset.split='1';el.classList.add('wsplit');
+  let i=0,line=0;
+  const out=[];
+  el.childNodes.forEach(n=>{
+    if(n.nodeType===3){
+      n.textContent.split(/(\s+)/).forEach(t=>{
+        if(!t)return;if(/^\s+$/.test(t)){out.push(' ');return}
+        const g=grad?` style="--i:${i};background:${line?grad[1]:grad[0]};-webkit-background-clip:text;background-clip:text;color:transparent"`:` style="--i:${i}"`;
+        out.push(`<span class="w"><span class="wi"${g}>${t}</span></span>`);i++;
+      });
+    }else if(n.nodeName==='BR'){out.push('<br>');line++}
+    else{out.push(n.outerHTML)}
+  });
+  el.innerHTML=out.join('');
+}
+if(!reduce){
+  const h1=$('h1');if(h1)split(h1,['linear-gradient(180deg,#fff 30%,#8a8a8a)','linear-gradient(180deg,#cfcfcf,#7a7a7a)']);
+  $$('.sec-h h2').forEach(h=>{if(!h.querySelector('*:not(br)'))split(h)});
+  const wio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('go');wio.unobserve(e.target)}}),{threshold:.35});
+  $$('.wsplit').forEach(h=>{
+    if(h.tagName==='H1'){const go=()=>setTimeout(()=>h.classList.add('go'),root.classList.contains('intro')?2500:50);
+      if(document.body.classList.contains('ready')||!root.classList.contains('intro'))go();else{const mo=new MutationObserver(()=>{if(!root.classList.contains('intro')){mo.disconnect();go()}});mo.observe(root,{attributes:true,attributeFilter:['class']})}
+    }else wio.observe(h);
+  });
+}
+
+/* ---------- scroll progress + marquee + year ---------- */
+const sp=$('#sp');
+const mq=$('#mq');
+const MQ=[['36 days','a year on social media'],['3×','odds of disturbed sleep'],['+8.3%','glucose after a late dinner'],['5 hours','of quiet every night'],['0','accounts. 0 ads. 0 tracking.']];
+if(mq){mq.innerHTML=[...MQ,...MQ,...MQ,...MQ].map(([a,b])=>`<span>${a} <em>${b}</em></span>`).join('')}
+let mqx=0,lastY=scrollY,vel=0;
+const yt=$('#ytall'),yN=$('#yN'),yC=$('#yC'),yS=$('#yS'),yd=$('#ydots');
+const Y={
+ world:{days:36,txt:'About 1 day in every 10 goes to social media.',src:'141 minutes a day on average, DataReportal and We Are Social, February 2025, via <a href="https://www.statista.com/statistics/433871/daily-social-media-usage-worldwide/" target="_blank" rel="noopener">Statista</a>. Days a year is our arithmetic.'},
+ india:{days:49,txt:'More than 1 day in every 8 goes to social media.',src:'194 minutes a day on average, Esya Centre and IIM Ahmedabad, 2023 (2,000 people plus app data), via <a href="https://www.business-standard.com/technology/tech-news/average-indian-spends-194-minutes-daily-on-social-media-platforms-report-123081600607_1.html" target="_blank" rel="noopener">Business Standard</a>. Days a year is our arithmetic.'}
+};
+let who='world';
+if(yd){yd.innerHTML=Array.from({length:372},(_,i)=>`<i class="${i>=365?'x':''}"></i>`).join('')}
+const dots=yd?$$('i',yd):[];
+let shown=-1;
+function paintYear(p){
+  const D=Y[who].days;
+  const e=reduce?1:Math.min(1,p*1.35);
+  const n=Math.round(D*(1-Math.pow(1-e,2)));
+  if(n!==shown){shown=n;yN.textContent=n;dots.forEach((d,i)=>d.classList.toggle('on',i<n))}
+}
+function setWho(w){who=w;shown=-1;yC.textContent=Y[w].txt;yS.innerHTML=Y[w].src;$$('#ychips .dchip').forEach(b=>b.classList.toggle('on',b.dataset.w===w));onScroll()}
+$$('#ychips .dchip').forEach(b=>b.addEventListener('click',()=>setWho(b.dataset.w)));
+if(yd)setWho('world');
+function onScroll(){
+  const h=document.documentElement.scrollHeight-innerHeight;
+  if(sp)sp.style.transform='scaleX('+(h>0?scrollY/h:0)+')';
+  if(yt){const r=yt.getBoundingClientRect();const p=Math.max(0,Math.min(1,-r.top/(r.height-innerHeight)));paintYear(p)}
+}
+addEventListener('scroll',onScroll,{passive:true});addEventListener('resize',onScroll);onScroll();
+if(!reduce&&mq){
+  let w=0;const measure=()=>{w=mq.scrollWidth/4};measure();addEventListener('resize',measure);
+  (function tick(){
+    const dy=scrollY-lastY;lastY=scrollY;vel+=(dy-vel)*.12;
+    mqx-=1.1+Math.abs(vel)*.9;if(-mqx>=w)mqx+=w;
+    mq.style.transform=`translate3d(${mqx}px,0,0) skewX(${Math.max(-10,Math.min(10,-vel*.35))}deg)`;
+    requestAnimationFrame(tick);
+  })();
+}
+
+/* ---------- magnetic buttons ---------- */
+if(!reduce&&!touch){
+  $$('.btn.p,.pill').forEach(b=>{
+    b.style.transition='transform .35s cubic-bezier(.2,.7,.2,1)';
+    b.addEventListener('pointermove',e=>{const r=b.getBoundingClientRect();const x=(e.clientX-r.left-r.width/2)*.22,y=(e.clientY-r.top-r.height/2)*.32;b.style.transform=`translate(${x}px,${y}px)`});
+    b.addEventListener('pointerleave',()=>{b.style.transform=''});
+  });
+}
+/* ---------- phone drifts with scroll ---------- */
+const stage=$('.stage');
+if(stage&&!reduce){addEventListener('scroll',()=>{if(scrollY<1000)stage.style.transform=`translateY(${scrollY*.08}px)`},{passive:true})}
 })();
 </script>
 </body>
