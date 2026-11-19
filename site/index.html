@@ -373,6 +373,28 @@ hr.sep{border:0;border-top:1px solid var(--line)}
 }
 @media (max-width:520px){.shipped{grid-template-columns:1fr}.bub .bi{font-size:12.5px;padding:8px}}
 @media (prefers-reduced-motion:reduce){.stopcard{opacity:1;transform:none}.car-ring{animation:none}}
+/* idea dialog */
+dialog#ideadlg{border:1px solid var(--line2);border-radius:22px;background:#0a0a0a;color:var(--fg);padding:30px;width:min(520px,calc(100vw - 32px));margin:auto;box-shadow:0 40px 120px rgba(0,0,0,.8)}
+dialog#ideadlg::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(6px)}
+dialog#ideadlg[open]{animation:dlgin .35s var(--ease)}
+@keyframes dlgin{from{opacity:0;transform:translateY(14px) scale(.98)}}
+#ideadlg h3{font-weight:800;font-size:28px;letter-spacing:-.035em;margin:6px 0 6px}
+.dsub{color:var(--mut);font-size:16.5px;margin-bottom:18px}
+#ideatxt{width:100%;resize:vertical;min-height:140px;max-height:320px;background:#050505;border:1px solid var(--line2);border-radius:14px;padding:14px 16px;color:#fff;font:500 16px/1.5 var(--main);transition:border-color .2s,box-shadow .2s}
+#ideatxt::placeholder{color:#666}
+#ideatxt:hover{border-color:#3a3a3a}
+#ideatxt:focus{outline:none;border-color:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.08)}
+.drow{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:8px 0 16px;min-height:22px}
+.drow .fine2{white-space:nowrap}
+.derr{font-family:var(--cap);font-weight:700;font-size:13.5px;color:#ff8a80;text-align:right}
+.dx{position:absolute;right:18px;top:18px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line2);transition:background .2s}
+.dx:hover{background:#151515}
+.dx i{position:absolute;inset:0}.dx i::before,.dx i::after{content:"";position:absolute;left:10px;right:10px;top:16px;height:2px;background:#fff;border-radius:2px;transform:rotate(45deg)}.dx i::after{transform:rotate(-45deg)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+#ideago[disabled]{opacity:.6;pointer-events:none}
+#ideago.busy::before{content:"";width:14px;height:14px;border-radius:50%;border:2px solid #000;border-top-color:transparent;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 /* install */
 .inst{display:grid;grid-template-columns:1.25fr 1fr;gap:16px}
 ol.steps{list-style:none;counter-reset:s;margin-top:8px}
@@ -669,7 +691,7 @@ footer a:hover{color:#fff}
   <div class="rm-h rv" style="margin-top:64px"><span class="tag">Exploring</span> Ideas in the pool</div>
   <p class="sub rv" style="font-size:17px;margin-bottom:18px">Early thoughts, drifting. Hover or tap one to read it.</p>
   <div class="pool rv" id="pool" aria-label="Floating ideas"></div>
-  <div class="poolread rv" id="poolread" aria-live="polite"><div><b>Pick an idea.</b><span>Each one is a question, not a promise.</span></div><a class="btn g sm" href="https://github.com/abhilashongit/StayClean/issues/new/choose" target="_blank" rel="noopener">Suggest an idea <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+  <div class="poolread rv" id="poolread" aria-live="polite"><div><b>Pick an idea.</b><span>Each one is a question, not a promise.</span></div><button class="btn g sm" type="button" id="openidea">Suggest an idea <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
 </div></section>
 
 <hr class="sep">
@@ -727,6 +749,29 @@ footer a:hover{color:#fff}
   </div>
   <p class="fine">Screens on this page are animated recreations of the app's real behaviour and wording, not screen recordings. Stay Clean is an independent project and is not affiliated with or endorsed by Swiggy, Zomato, Instagram, X, Google or Meta; all names belong to their owners. Research summaries are for context only and are not medical advice. Type: Manrope and Nunito (SIL OFL), Inter inside the phone screens.</p>
 </div></footer>
+
+<dialog id="ideadlg" aria-labelledby="ideat">
+  <form id="ideaform" method="dialog" novalidate>
+    <button type="button" class="dx" id="ideax" aria-label="Close"><i></i></button>
+    <div id="ideain">
+      <div class="cap">Idea box</div>
+      <h3 id="ideat">Suggest an idea</h3>
+      <p class="dsub">Tell us what would make Stay Clean better for you. It goes straight to GitHub as a public issue.</p>
+      <label for="ideatxt" class="sr">Your idea</label>
+      <textarea id="ideatxt" name="idea" rows="6" maxlength="1200" placeholder="What would you like Stay Clean to do?" required></textarea>
+      <div class="hp" aria-hidden="true"><label>Website<input type="text" name="website" id="ideahp" tabindex="-1" autocomplete="off"></label></div>
+      <div class="drow"><span class="fine2" id="ideacnt">0 / 1200</span><span class="derr" id="ideaerr" role="alert"></span></div>
+      <button class="btn p" type="submit" id="ideago">Send idea <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <p class="fine2" style="margin-top:14px">No name, email or account needed, and nothing about you is collected. Please keep personal details out of your idea, because it is public.</p>
+    </div>
+    <div id="ideaok" hidden>
+      <div class="cap">Sent</div>
+      <h3>Thank you.</h3>
+      <p class="dsub">Your idea is now on GitHub, where anyone can read it and add to it.</p>
+      <div class="cta" style="margin:20px 0 0"><a class="btn p" id="ideaurl" href="#" target="_blank" rel="noopener">See it on GitHub <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><button class="btn g" type="button" id="ideaagain">Send another</button></div>
+    </div>
+  </form>
+</dialog>
 
 <script>
 (()=>{
@@ -1102,6 +1147,42 @@ $('.q').classList.add('open');
     new IntersectionObserver(es=>{const v=es[0].isIntersecting;if(v&&!run){run=true;last=0;requestAnimationFrame(step)}else if(!v)run=false},{threshold:.05}).observe(pool);
   }
   addEventListener('resize',()=>{size();B.forEach(b=>{b.x=Math.min(Math.max(b.x,b.r),W-b.r);b.y=Math.min(Math.max(b.y,b.r),H-b.r)});place()});
+})();
+
+
+/* idea box */
+(()=>{
+  const dlg=$('#ideadlg'),open=$('#openidea');if(!dlg||!open)return;
+  const f=$('#ideaform'),ta=$('#ideatxt'),err=$('#ideaerr'),go=$('#ideago'),cnt=$('#ideacnt');
+  let t0=0;
+  const fallback='https://github.com/abhilashongit/StayClean/issues/new/choose';
+  const reset=()=>{$('#ideain').hidden=false;$('#ideaok').hidden=true;err.textContent='';ta.value='';cnt.textContent='0 / 1200';go.disabled=false;go.classList.remove('busy')};
+  open.addEventListener('click',()=>{reset();t0=Date.now();if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','');setTimeout(()=>ta.focus(),60)});
+  $('#ideax').addEventListener('click',()=>dlg.close());
+  dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+  $('#ideaagain').addEventListener('click',()=>{reset();t0=Date.now();ta.focus()});
+  ta.addEventListener('input',()=>{cnt.textContent=ta.value.length+' / 1200';err.textContent=''});
+  const say=m=>{err.innerHTML=m};
+  f.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const idea=ta.value.trim();
+    if(idea.length<10){say('Please write a little more (at least 10 characters).');ta.focus();return}
+    go.disabled=true;go.classList.add('busy');err.textContent='';
+    try{
+      const r=await fetch('/api/suggest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idea,website:$('#ideahp').value,t:t0})});
+      const j=await r.json().catch(()=>({}));
+      if(r.ok&&j.ok){
+        $('#ideain').hidden=true;$('#ideaok').hidden=false;
+        const a=$('#ideaurl');if(j.url){a.href=j.url;a.hidden=false}else{a.hidden=true}
+      }else{
+        const m={rate:'That is a lot of ideas at once. Please try again in a little while.',timing:'That was quick. Please try once more.',length:'Please keep it between 10 and 1,200 characters.',links:'Please keep links to two or fewer.'}[j.error];
+        say(m||('We could not send that just now. You can <a href="'+fallback+'" target="_blank" rel="noopener" style="text-decoration:underline">post it on GitHub</a> instead.'));
+        go.disabled=false;go.classList.remove('busy');
+      }
+    }catch(x){
+      say('You seem to be offline. Please try again.');go.disabled=false;go.classList.remove('busy');
+    }
+  });
 })();
 
 /* copy checksum */
