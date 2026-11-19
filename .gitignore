@@ -1,0 +1,15 @@
+# Build output
+*.iml
+.gradle/
+build/
+local.properties
+.idea/
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Secrets: never commit signing keys
+keystore.properties
+*.jks
+*.keystore

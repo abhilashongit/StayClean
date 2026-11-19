@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="740" viewBox="0 0 360 740"><rect x="2" y="2" width="356" height="736" rx="44" fill="#000" stroke="#2a2a2a" stroke-width="4"/><text x="28" y="86" font-family='Inter, Helvetica, Arial, sans-serif' font-size="26" font-weight="600" fill="#fff" letter-spacing="7">STAY CLEAN</text>
+<text x="28" y="116" font-family='Inter, Helvetica, Arial, sans-serif' font-size="13" font-weight="300" fill="#9a9a9a">Swiggy and Zomato stay closed</text>
+<text x="28" y="134" font-family='Inter, Helvetica, Arial, sans-serif' font-size="13" font-weight="300" fill="#9a9a9a">from 12 am to 5 am IST.</text>
+<text x="28" y="168" font-family='Inter, Helvetica, Arial, sans-serif' font-size="12" font-weight="500" fill="#fff" letter-spacing="1">Open now</text>
+<line x1="28" y1="188" x2="332" y2="188" stroke="#1c1c1c"/>
+<text x="28" y="214" font-family='Inter, Helvetica, Arial, sans-serif' font-size="15" font-weight="500" fill="#eee">Night lock</text><text x="28" y="233" font-family='Inter, Helvetica, Arial, sans-serif' font-size="11" font-weight="300" fill="#888">Instagram and X, 11 pm to 5 am</text>
+<rect x="282" y="205" width="50" height="28" rx="14" fill="#fff"/><circle cx="318" cy="219" r="10" fill="#000"/>
+<line x1="28" y1="252" x2="332" y2="252" stroke="#1c1c1c"/>
+<text x="28" y="278" font-family='Inter, Helvetica, Arial, sans-serif' font-size="15" font-weight="500" fill="#eee">Instagram limit</text><text x="28" y="297" font-family='Inter, Helvetica, Arial, sans-serif' font-size="11" font-weight="300" fill="#888">5 minutes in every 30</text><text x="332" y="278" font-family='Inter, Helvetica, Arial, sans-serif' font-size="13" fill="#777" text-anchor="end">Always</text>
+<text x="28" y="344" font-family='Inter, Helvetica, Arial, sans-serif' font-size="11" font-weight="500" fill="#777" letter-spacing="3">SETUP</text>
+<line x1="28" y1="362" x2="332" y2="362" stroke="#1c1c1c"/>
+<text x="28" y="384" font-family='Inter, Helvetica, Arial, sans-serif' font-size="12" fill="#666">1</text>
+<text x="52" y="384" font-family='Inter, Helvetica, Arial, sans-serif' font-size="15" font-weight="500" fill="#eee">Notifications</text>
+<text x="52" y="403" font-family='Inter, Helvetica, Arial, sans-serif' font-size="11" font-weight="300" fill="#888">Keeps the guard visible and alive</text>
+<text x="332" y="384" font-family='Inter, Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#fff" text-anchor="end">On</text><line x1="28" y1="418" x2="332" y2="418" stroke="#1c1c1c"/>
+<text x="28" y="440" font-family='Inter, Helvetica, Arial, sans-serif' font-size="12" fill="#666">2</text>
+<text x="52" y="440" font-family='Inter, Helvetica, Arial, sans-serif' font-size="15" font-weight="500" fill="#eee">Cover screen</text>
+<text x="52" y="459" font-family='Inter, Helvetica, Arial, sans-serif' font-size="11" font-weight="300" fill="#888">Display over other apps</text>
+<text x="332" y="440" font-family='Inter, Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#fff" text-anchor="end">On</text><line x1="28" y1="474" x2="332" y2="474" stroke="#1c1c1c"/>
+<text x="28" y="496" font-family='Inter, Helvetica, Arial, sans-serif' font-size="12" fill="#666">3</text>
+<text x="52" y="496" font-family='Inter, Helvetica, Arial, sans-serif' font-size="15" font-weight="500" fill="#eee">Backup guard</text>
+<text x="52" y="515" font-family='Inter, Helvetica, Arial, sans-serif' font-size="11" font-weight="300" fill="#888">Usage access, takes over if Guard stops</text>
+<text x="332" y="496" font-family='Inter, Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#fff" text-anchor="end">On</text><line x1="28" y1="530" x2="332" y2="530" stroke="#1c1c1c"/>
+<text x="28" y="552" font-family='Inter, Helvetica, Arial, sans-serif' font-size="12" fill="#666">4</text>
+<text x="52" y="552" font-family='Inter, Helvetica, Arial, sans-serif' font-size="15" font-weight="500" fill="#eee">Lock uninstall</text>
+<text x="52" y="571" font-family='Inter, Helvetica, Arial, sans-serif' font-size="11" font-weight="300" fill="#888">Device admin, uninstall needs it removed first</text>
+<text x="332" y="552" font-family='Inter, Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#fff" text-anchor="end">On</text><line x1="28" y1="586" x2="332" y2="586" stroke="#1c1c1c"/>
+<text x="28" y="608" font-family='Inter, Helvetica, Arial, sans-serif' font-size="12" fill="#666">5</text>
+<text x="52" y="608" font-family='Inter, Helvetica, Arial, sans-serif' font-size="15" font-weight="500" fill="#eee">Stay alive</text>
+<text x="52" y="627" font-family='Inter, Helvetica, Arial, sans-serif' font-size="11" font-weight="300" fill="#888">Battery: unrestricted</text>
+<text x="332" y="608" font-family='Inter, Helvetica, Arial, sans-serif' font-size="13" font-weight="600" fill="#fff" text-anchor="end">On</text><line x1="28" y1="642" x2="332" y2="642" stroke="#1c1c1c"/>
+<text x="28" y="664" font-family='Inter, Helvetica, Arial, sans-serif' font-size="12" fill="#666">6</text>
+<text x="52" y="664" font-family='Inter, Helvetica, Arial, sans-serif' font-size="15" font-weight="500" fill="#eee">Guard</text>
+<text x="52" y="683" font-family='Inter, Helvetica, Arial, sans-serif' font-size="11" font-weight="300" fill="#888">Accessibility, closes the apps instantly</text>
+<text x="332" y="664" font-family='Inter, Helvetica, Arial, sans-serif' font-size="13" font-weight="400" fill="#777" text-anchor="end">Set up</text></svg>

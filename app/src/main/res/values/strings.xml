@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Stay Clean</string>
+    <string name="service_description">Helps you stay on track by closing distracting apps and pages at the times you set. Only reads which app or page is on screen.</string>
+</resources>
