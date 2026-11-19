@@ -241,6 +241,17 @@ hr.sep{border:0;border-top:1px solid var(--line)}
 .also b{display:block;font-weight:700;font-size:17px;letter-spacing:-.01em}
 .also small{font-family:var(--cap);font-weight:600;font-size:14.5px;color:var(--mut);line-height:1.45;display:block}
 
+.bs-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
+.sq100{display:grid;grid-template-columns:repeat(20,1fr);gap:4px;margin:16px 0 20px}
+.sq100 i{aspect-ratio:1;border-radius:3px;background:#161616;border:1px solid #222}
+.sq100 i.u{background:linear-gradient(90deg,#fff 0 67%,#161616 67% 100%);border-color:#555;box-shadow:0 0 12px rgba(255,255,255,.35)}
+.bs-sq{display:flex;flex-direction:column;justify-content:center}
+.bs-big{font-size:clamp(20px,2.4vw,26px);font-weight:700;letter-spacing:-.03em;line-height:1.25;color:var(--mut)}
+.bs-big b{color:#fff}
+.bs-list{display:flex;flex-direction:column;justify-content:center;gap:22px}
+.bs-i b{display:block;font-weight:800;font-size:clamp(20px,2.2vw,24px);letter-spacing:-.03em;margin-bottom:4px}
+.bs-i small{font-family:var(--cap);font-weight:600;font-size:15.5px;color:var(--mut);line-height:1.5}
+@media (max-width:860px){.bs-wrap{grid-template-columns:1fr}.sq100{grid-template-columns:repeat(10,1fr)}}
 /* battery */
 .bat{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;align-items:start}
 .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
@@ -597,51 +608,21 @@ footer a:hover{color:#fff}
 
 <section id="battery"><div class="wrap">
   <div class="sec-h rv"><div class="eyebrow">Battery</div>
-    <h2>Light enough to forget.</h2>
-    <p class="sub">Stay Clean sleeps all day and keeps a quiet watch at night. Here is what that costs, even on a tired battery.</p></div>
-  <div class="bat">
-    <div class="card rv">
-      <div class="mini">
-        <div><b data-count="0" data-dec="0" data-suf=" min">0 min</b><span>Wake locks held per day. Google flags apps above 2 hours.</span></div>
-        <div><b data-count="79" data-dec="0" data-pre="≤ ">≤ 79</b><span>Alarms per day, at most: 5 shift changes and a 5-minute night heartbeat.</span></div>
-        <div><b data-count="17" data-dec="0">17</b><span>Apps in scope by day. Android filters everything else out.</span></div>
-      </div>
-      <div class="cap" style="margin-bottom:8px">Your 24 hours, IST. Move over the bar.</div>
-      <div class="strip" id="strip" aria-label="24-hour power timeline"></div>
-      <div class="sticks"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>12 AM</span></div>
-      <div class="readout" id="readout" aria-live="polite"><b>Resting.</b><span>Nothing runs. Only the watched apps can wake the guard.</span></div>
-      <div class="legend"><span><i style="background:#101010;border:1px solid #333"></i>Day: nothing runs</span><span><i style="background:#5a5a5a"></i>Morning: settings lock only</span><span><i style="background:#e8e8e8"></i>Night watch</span><span><i style="background:var(--ok)"></i>Shift-change alarm</span></div>
+    <h2>You will not notice it.</h2>
+    <p class="sub">Stay Clean uses less than 1% of your battery in a whole day. Even on an old, tired battery.</p></div>
+  <div class="bs-wrap">
+    <div class="card rv bs-sq">
+      <div class="cap">Picture your battery as 100 squares</div>
+      <div class="sq100" role="img" aria-label="100 squares, with less than one of them lit"><i class="u"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <p class="bs-big">Stay Clean uses <b>less than one square</b> a day.</p>
     </div>
-    <div class="card calc rv" style="--d:.08s">
-      <div class="cap">Worst case, worn battery</div>
-      <h3>What a day costs you.</h3>
-      <div class="pre" id="pre">
-        <button class="dchip" data-c="4000">New · 4,000</button><button class="dchip" data-c="2500">Tired · 2,500</button><button class="dchip on" data-c="1500">Worn · 1,500</button>
-      </div>
-      <input class="range" id="cap" type="range" min="1000" max="5000" step="100" value="1500" aria-label="Battery capacity in mAh" style="margin:10px 0 0">
-      <div class="fine2" id="capl">Your battery holds 1,500 mAh today</div>
-      <div class="pbig" id="pct">0.67<small>% of a full charge</small></div>
-      <div class="bar"><i id="barfill" style="width:.67%"></i></div>
-      <div class="fine2" id="ratio">About 1 part in 150 of one charge, per day.</div>
-      <ul class="assume">
-        <li>Estimate: 79 alarms × 0.5 s awake × 400 mA ≈ 4.4 mAh</li>
-        <li>Plus a padded allowance for a busy night of 20 blocks and the quiet notification, rounded up to 10 mAh a day</li>
-        <li>Design estimate from the source code, not a lab measurement. Check yours in your phone's battery usage screen.</li>
-      </ul>
+    <div class="card rv bs-list" style="--d:.08s">
+      <div class="bs-i"><b>Asleep all day.</b><small>Nothing is running. It rests while you get on with your life.</small></div>
+      <div class="bs-i"><b>Awake only at night.</b><small>Like a quiet night guard. It sits still and steps in only when you open something it watches.</small></div>
+      <div class="bs-i"><b>Old battery? Still fine.</b><small>Even a worn-out battery loses less than 1% a day to it. That is about two minutes of screen time.</small></div>
     </div>
   </div>
-
-  <div class="hd2 rv">Under the hood</div>
-  <div class="hood rv">
-    <div class="hd"><b>Event-driven, never polling</b><small>An <code>AccessibilityService</code> subscribed to <code>TYPE_WINDOW_STATE_CHANGED</code> only. Android delivers the events, so the app never loops waiting for them.</small></div>
-    <div class="hd"><b>Scoped by package</b><small>By day the event filter narrows to 17 packages: 13 browsers, Swiggy, Zomato, Instagram and X. The system never dispatches events for anything else.</small></div>
-    <div class="hd"><b>Phase-gated</b><small>Three IST phases: <code>DAY</code>, <code>TAMPER</code>, <code>ACTIVE</code>. The foreground watchdog exists only in ACTIVE and stops itself the moment it ends.</small></div>
-    <div class="hd"><b>One exact alarm at a time</b><small><code>setExactAndAllowWhileIdle</code> aims at the next boundary, with a 5-minute heartbeat at night. Boot and clock-change receivers re-arm it.</small></div>
-    <div class="hd"><b>No wake locks</b><small>Internal timers use uptime, so they run only while the phone is already awake and never pull it out of deep sleep.</small></div>
-    <div class="hd"><b>Decisions stay local</b><small>A small pure-Java rule table in memory. The only network call is a tiny time check at boot or when the clock changes.</small></div>
-  </div>
-  <p class="fine2 rv" style="margin-top:18px;max-width:46em">The guard does not depend on charge level: a block is decided on the phone and drawn straight from the event, with no network lookup. On phones with aggressive battery managers, set Stay Clean to Unrestricted in setup so the system does not put it to sleep.</p>
-  <p class="src rv" style="margin-top:10px">Reference: Android vitals treats more than 2 cumulative hours of wake locks in 24 hours as excessive. <a href="https://android-developers.googleblog.com/2025/11/raising-bar-on-battery-performance.html" target="_blank" rel="noopener">Android Developers Blog ↗</a></p>
+  <p class="fine2 rv" style="margin-top:18px;max-width:42em">This is our own careful estimate from how the app is built, not a lab test. You can see the real number in your phone's battery screen.</p>
 </div></section>
 
 <hr class="sep">
@@ -982,46 +963,6 @@ $$('.orow').forEach(r=>{
   const o=new IntersectionObserver(es=>{if(es[0].isIntersecting){o.disconnect();show(1)}},{threshold:.4});o.observe(g);
   show(1);
 })();
-
-/* battery: 24h strip */
-(()=>{
-  const st=$('#strip');if(!st)return;
-  const P=h=>(h/24*100)+'%';
-  const A1=22+55/60,A2=5+5/60;
-  st.innerHTML=`<div class="seg act" style="left:0;width:${P(A2)}"></div><div class="seg tam" style="left:${P(A2)};width:${P(6-A2)}"></div><div class="seg act" style="left:${P(A1)};width:${P(24-A1)}"></div>`+
-   [0,5,5+5/60,6,A1].map(h=>`<span class="alm" style="left:${P(h)}"></span>`).join('')+'<span class="cursor" id="cur"></span>';
-  const ro=$('#readout');
-  const t12=h=>{const hh=Math.floor(h),mm=Math.floor((h-hh)*60);return((hh%12)||12)+':'+String(mm).padStart(2,'0')+' '+(hh<12?'AM':'PM')};
-  function say(h){
-    let b,t;
-    if(h>=A1&&h<23){b='Warming up.';t='The guard wakes at 10:55 pm, a few minutes ahead of the Night lock.'}
-    else if(h>=A1||h<A2){b='Night watch.';t='Guard awake. Food apps closed 12–5 am, Instagram and X closed 11 pm–5 am with the Night lock on. A 5-minute heartbeat.'}
-    else if(h<6){b='Morning.';t='Only the settings lock stays on, until 6 am. Everything else rests.'}
-    else{b='Resting.';t='Nothing runs. Only the 17 watched apps can wake the guard, and only to check the clock.'}
-    ro.innerHTML='<b>'+t12(h)+' · '+b+'</b><span>'+t+'</span>';
-    $('#cur').style.left=P(h);
-  }
-  const at=e=>{const r=st.getBoundingClientRect();say(Math.max(0,Math.min(23.99,(e.clientX-r.left)/r.width*24)))};
-  st.addEventListener('pointermove',at);st.addEventListener('pointerdown',at);
-  say(14.5);
-})();
-
-/* battery: calculator */
-(()=>{
-  const r=$('#cap');if(!r)return;const DAILY=10;
-  function calc(c){
-    const p=DAILY/c*100;
-    $('#capl').textContent='Your battery holds '+Number(c).toLocaleString('en-US')+' mAh today';
-    $('#pct').innerHTML=p.toFixed(2)+'<small>% of a full charge</small>';
-    $('#barfill').style.width=Math.max(p,.4)+'%';
-    $('#ratio').textContent='About 1 part in '+Math.round(c/DAILY)+' of one charge, per day.';
-    $$('#pre .dchip').forEach(b=>b.classList.toggle('on',+b.dataset.c===+c));
-  }
-  r.addEventListener('input',()=>calc(r.value));
-  $$('#pre .dchip').forEach(b=>b.addEventListener('click',()=>{r.value=b.dataset.c;calc(b.dataset.c)}));
-  calc(r.value);
-})();
-
 
 /* faq */
 $$('.q button').forEach(b=>b.addEventListener('click',()=>{const q=b.parentElement;const o=q.classList.contains('open');$$('.q').forEach(x=>x.classList.remove('open'));if(!o)q.classList.add('open')}));
