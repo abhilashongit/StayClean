@@ -155,9 +155,9 @@ h1{font-weight:800;font-size:clamp(40px,6vw,76px);line-height:.98;letter-spacing
 
 /* intro loader */
 #intro{position:fixed;inset:0;z-index:300;background:#000;color:#fff;display:none;flex-direction:column;justify-content:space-between;padding:26px clamp(20px,5vw,56px) 30px;transition:transform .95s cubic-bezier(.76,0,.24,1);cursor:pointer;will-change:transform}
-html.intro #intro{display:flex;animation:introfail .01s 8s forwards}
+html.intro #intro{display:flex;animation:introfail .01s 9s forwards}
 @keyframes introfail{to{visibility:hidden}}
-#intro.out{transform:translateY(-101%)}
+#intro.out{display:flex;transform:translateY(-101%);pointer-events:none}
 .in-top{display:flex;justify-content:space-between;align-items:center;font-family:var(--cap);font-weight:700;font-size:14px;color:var(--mut)}
 .in-brand{display:flex;align-items:center;gap:10px;color:#fff;font-family:var(--main);font-weight:800;font-size:17px;letter-spacing:-.02em}
 .in-brand i{width:18px;height:18px;border-radius:50%;border:2.5px solid #fff;display:block}
@@ -166,8 +166,10 @@ html.intro #intro{display:flex;animation:introfail .01s 8s forwards}
 .in-num b{font-weight:800;font-size:clamp(120px,24vw,320px);line-height:.85;letter-spacing:-.07em;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff 25%,#6f6f6f);-webkit-background-clip:text;background-clip:text;color:transparent}
 .in-num span{font-weight:800;font-size:clamp(30px,6vw,84px);letter-spacing:-.04em;color:#9a9a9a}
 .in-cap{font-family:var(--cap);font-weight:700;font-size:clamp(17px,2.1vw,24px);line-height:1.4;color:var(--mut);max-width:24em;margin-top:clamp(14px,2vw,26px);transition:opacity .5s,transform .7s cubic-bezier(.7,0,.2,1)}
-.in-final{position:absolute;left:0;right:0;top:50%;transform:translateY(-30%);opacity:0;font-weight:800;font-size:clamp(38px,7.4vw,104px);line-height:1;letter-spacing:-.055em;max-width:9em;transition:opacity .6s .35s,transform .8s .35s cubic-bezier(.2,.7,.2,1);margin:0}
-#intro.p2 .in-num,#intro.p2 .in-cap{opacity:0;transform:translateY(-24px);transition-duration:.3s}
+.in-final{position:absolute;left:0;right:0;top:50%;transform:translateY(-30%);opacity:0;font-weight:800;font-size:clamp(38px,7.4vw,104px);line-height:1;letter-spacing:-.055em;max-width:9em;transition:opacity .6s .45s,transform .8s .45s cubic-bezier(.2,.7,.2,1);margin:0}
+#intro.p2 .in-num,#intro.p2 .in-cap{opacity:0;transform:translateY(-24px);transition:opacity .35s ease,transform .45s ease}
+#intro .in-top,#intro .in-mid,#intro .in-bot{transition:opacity .3s ease}
+#intro.fade .in-top,#intro.fade .in-mid,#intro.fade .in-bot{opacity:0}
 #intro.p2 .in-final{opacity:1;transform:translateY(-50%)}
 .in-bot{display:flex;align-items:center;gap:24px;font-family:var(--cap);font-weight:600;font-size:13px;color:var(--dim)}
 .in-bot span{flex:none;max-width:60%}
@@ -179,9 +181,10 @@ html.intro .hero .rv{opacity:0!important;transform:translateY(26px)!important;tr
 /* scroll progress */
 #sp{position:fixed;left:0;top:0;height:2px;width:100%;background:#fff;transform:scaleX(0);transform-origin:left;z-index:120;pointer-events:none;opacity:.85}
 /* word reveal */
-.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.14em;margin-bottom:-.14em}
-.wi{display:inline-block;transform:translateY(108%);transition:transform .9s var(--ease);transition-delay:calc(var(--i)*65ms)}
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.22em;margin-bottom:-.22em}
+.wi{display:inline-block;padding-bottom:.22em;margin-bottom:-.22em;transform:translateY(108%);transition:transform .9s var(--ease);transition-delay:calc(var(--i)*65ms)}
 .wsplit.go .wi{transform:none}
+.wsplit{background:none!important}   /* words carry their own gradient; the parent's would paint ghosts */
 html:not(.js) .wi{transform:none}
 /* marquee */
 .marq{border-block:1px solid var(--line);overflow:hidden;padding:18px 0;margin-top:34px;background:#030303}
@@ -1395,12 +1398,17 @@ const STATS=[
  {n:3,u:'weeks',cap:'of capped social media use was enough for less loneliness and depression.',src:'Hunt et al., 2018 · 143 students'}
 ];
 const intro=$('#intro');
+let ending=false;
 function endIntro(){
-  if(!intro||!root.classList.contains('intro'))return;
-  intro.classList.add('out');
-  root.classList.remove('intro');
-  document.body.classList.add('ready');
-  setTimeout(()=>{intro.remove()},1100);
+  if(ending||!intro||!root.classList.contains('intro'))return;
+  ending=true;
+  intro.classList.add('fade');                       // words leave first, so nothing rides up with the curtain
+  setTimeout(()=>{
+    intro.classList.add('out');
+    root.classList.remove('intro');
+    document.body.classList.add('ready');
+    setTimeout(()=>{intro.remove()},1050);
+  },320);
 }
 if(intro&&root.classList.contains('intro')){
   let last=-1;try{last=+localStorage.getItem('sc_last')}catch(e){}
@@ -1408,15 +1416,16 @@ if(intro&&root.classList.contains('intro')){
   try{localStorage.setItem('sc_last',k)}catch(e){}
   const S=STATS[k],dec=String(S.n).includes('.')?1:0;
   $('#inU').textContent=S.u;$('#inC').textContent=S.cap;$('#inS').textContent=S.src;
-  const N=$('#inN'),B=$('#inB'),D=1500,t0=performance.now();
+  const N=$('#inN'),B=$('#inB'),D=2400,t0=performance.now();
   let done=false;
   (function f(n){
     const p=Math.min(1,(n-t0)/D),e=p===1?1:1-Math.pow(2,-10*p);
-    N.textContent=(S.pre||'')+(S.n*e).toFixed(dec);B.style.transform='scaleX('+p+')';
+    N.textContent=(S.pre||'')+(S.n*e).toFixed(dec);B.style.transform='scaleX('+Math.min(1,(n-t0)/4600)+')';
+    if(p===1&&(n-t0)<4600){requestAnimationFrame(f);return}
     if(p<1&&!done)requestAnimationFrame(f);
   })(t0);
-  const t1=setTimeout(()=>intro.classList.add('p2'),1750);
-  const t2=setTimeout(endIntro,2700);
+  const t1=setTimeout(()=>intro.classList.add('p2'),3000);   // number holds ~0.6 s after it lands
+  const t2=setTimeout(endIntro,4700);                         // line holds ~1.3 s; curtain gone by ~5 s
   intro.addEventListener('click',()=>{done=true;clearTimeout(t1);clearTimeout(t2);endIntro()});
   addEventListener('keydown',()=>{clearTimeout(t1);clearTimeout(t2);endIntro()},{once:true});
 }else{document.body.classList.add('ready')}
@@ -1443,7 +1452,7 @@ if(!reduce){
   $$('.sec-h h2').forEach(h=>{if(!h.querySelector('*:not(br)'))split(h)});
   const wio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('go');wio.unobserve(e.target)}}),{threshold:.35});
   $$('.wsplit').forEach(h=>{
-    if(h.tagName==='H1'){const go=()=>setTimeout(()=>h.classList.add('go'),root.classList.contains('intro')?2500:50);
+    if(h.tagName==='H1'){const go=()=>setTimeout(()=>h.classList.add('go'),root.classList.contains('intro')?2500:450);
       if(document.body.classList.contains('ready')||!root.classList.contains('intro'))go();else{const mo=new MutationObserver(()=>{if(!root.classList.contains('intro')){mo.disconnect();go()}});mo.observe(root,{attributes:true,attributeFilter:['class']})}
     }else wio.observe(h);
   });
