@@ -207,6 +207,63 @@ html:not(.js) .wi{transform:none}
 .ysrc a{color:var(--mut);border-bottom:1px solid #444}
 @media (max-width:760px){.ytall{height:250vh}.ydots{grid-template-columns:repeat(31,1fr)}}
 @media (prefers-reduced-motion:reduce){.ytall{height:auto}.ysticky{position:static;height:auto;padding:80px 0}}
+
+/* year slider */
+.yctl{display:flex;flex-wrap:wrap;gap:14px 30px;align-items:center;margin-bottom:22px}
+.yctl .ychips{margin-bottom:0}
+.yslide{display:flex;align-items:center;gap:14px;font-family:var(--cap);font-weight:700;font-size:13px;color:var(--mut)}
+.yslide input{-webkit-appearance:none;appearance:none;width:min(240px,50vw);height:24px;background:transparent;cursor:pointer;margin:0}
+.yslide input::-webkit-slider-runnable-track{height:3px;border-radius:3px;background:linear-gradient(90deg,#fff var(--f,29%),#2a2a2a var(--f,29%))}
+.yslide input::-moz-range-track{height:3px;border-radius:3px;background:#2a2a2a}
+.yslide input::-moz-range-progress{height:3px;border-radius:3px;background:#fff}
+.yslide input::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;margin-top:-7.5px;box-shadow:0 0 0 5px rgba(255,255,255,.12);transition:box-shadow .2s}
+.yslide input:active::-webkit-slider-thumb{box-shadow:0 0 0 9px rgba(255,255,255,.16)}
+.yslide input::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:0}
+.yslide output{min-width:104px;color:#fff;font-variant-numeric:tabular-nums}
+/* cursor ring */
+#cur{position:fixed;left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px;border:1.5px solid #fff;border-radius:50%;pointer-events:none;z-index:400;mix-blend-mode:difference;opacity:0;will-change:transform;transition:width .28s var(--ease),height .28s var(--ease),margin .28s var(--ease),background .28s,opacity .25s}
+#cur.on{opacity:1}
+#cur.hot{width:64px;height:64px;margin:-32px 0 0 -32px;background:#fff}
+#cur.dn{width:22px;height:22px;margin:-11px 0 0 -11px}
+@media (hover:none),(pointer:coarse){#cur{display:none}}
+/* one night: pinned phone story */
+#night{position:relative;border-top:1px solid var(--line)}
+.ntall{height:560vh;position:relative}
+.nsticky{position:sticky;top:64px;height:calc(100vh - 64px);height:calc(100svh - 64px);display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:clamp(24px,6vw,96px);overflow:hidden;--dawn:0}
+.nsticky::before,.nsticky::after{content:"";position:absolute;right:calc(50% - 600px);top:50%;width:760px;height:760px;max-width:120vw;transform:translateY(-50%);border-radius:50%;pointer-events:none}
+.nsticky::before{background:radial-gradient(closest-side,rgba(255,255,255,.11),transparent);opacity:calc(1 - var(--dawn)*.7)}
+.nsticky::after{background:radial-gradient(closest-side,rgba(255,176,96,.26),transparent);opacity:var(--dawn)}
+.nleft,.nwrap{position:relative;z-index:1}
+.nbig{font-weight:800;font-size:clamp(56px,9vw,128px);line-height:.9;letter-spacing:-.07em;font-variant-numeric:tabular-nums;margin:10px 0 clamp(18px,3vw,34px);background:linear-gradient(180deg,#fff 25%,#6f6f6f);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.nchap{position:relative;min-height:176px}
+.nc{position:absolute;left:0;top:0;right:0;opacity:0;transform:translateY(20px);transition:opacity .5s var(--ease),transform .6s var(--ease);pointer-events:none}
+.nc.on{opacity:1;transform:none;pointer-events:auto}
+.nc .nct{display:block;font-family:var(--cap);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.nc h3{font-weight:800;font-size:clamp(26px,3.3vw,42px);letter-spacing:-.045em;line-height:1.08;max-width:15em}
+.nc p{color:var(--mut);max-width:27em;margin-top:12px;font-size:clamp(16px,1.5vw,19px)}
+.nrail{display:flex;gap:10px;margin-top:clamp(18px,3vw,34px);max-width:520px}
+.nr-b{flex:1;text-align:left;background:none;border:0;border-top:2px solid #232323;padding:10px 0 0;color:var(--dim);font:700 12px var(--cap);letter-spacing:.04em;cursor:pointer;transition:color .3s,border-color .3s}
+.nr-b.past{border-top-color:#777;color:#8d8d8d}
+.nr-b.on{border-top-color:#fff;color:#fff}
+.nwrap{perspective:1300px;display:grid;place-items:center}
+.nph{transform-style:preserve-3d;will-change:transform}
+.nscale{transform-origin:0 0;width:300px;height:610px;text-align:left}
+.nphone{width:300px!important}
+.morning{position:absolute;left:0;right:0;bottom:0;padding:70px 20px 46px;text-align:center;background:linear-gradient(180deg,transparent,rgba(255,170,90,.34));z-index:6;animation:mrise .9s var(--ease) both}
+.morning b{display:block;font-weight:800;font-size:22px;letter-spacing:-.04em}
+.morning span{display:block;font-size:12px;color:#e8d3bd;margin-top:4px}
+@keyframes mrise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@media (max-width:860px){
+  .ntall{height:520vh}
+  .nsticky{grid-template-columns:1fr;grid-template-rows:auto auto;align-content:center;justify-items:center;text-align:center;gap:14px}
+  .nsticky .eyebrow{justify-content:center}
+  .nbig{font-size:clamp(44px,15vw,72px);margin:4px 0 10px}
+  .nchap{min-height:158px}.nc h3{margin-inline:auto;font-size:clamp(23px,6.4vw,30px)}.nc p{margin-inline:auto;font-size:15px;margin-top:8px}
+  .nrail{margin:14px auto 0}.nleft{width:100%}
+  .nsticky .eyebrow{display:none}
+  .nsticky::before,.nsticky::after{right:50%;transform:translate(50%,-10%);top:62%}
+}
+@media (prefers-reduced-motion:reduce){.ntall{height:auto}.nsticky{position:static;height:auto;padding:84px 0}.nchap{min-height:0}.nc{position:static;opacity:1;transform:none;margin-bottom:26px}.nrail{display:none}}
 /* browser */
 .browser{background:#0e0e10;padding:44px 12px 12px}
 .addr{display:flex;align-items:center;gap:8px;height:38px;border-radius:19px;background:#1b1b1f;padding:0 14px;font-size:12px;color:#d9d9d9;margin-top:6px}
@@ -581,6 +638,7 @@ footer a:hover{color:#fff}
   <div class="in-bot"><span id="inS"></span><div class="in-bar"><i id="inB"></i></div></div>
 </div>
 <div id="sp" aria-hidden="true"></div>
+<div id="cur" aria-hidden="true"></div>
 
 
 
@@ -630,10 +688,23 @@ footer a:hover{color:#fff}
   <div class="eyebrow">A year of attention</div>
   <div class="ybig"><b id="yN">0</b><span>days</span></div>
   <p class="ycap" id="yC"></p>
-  <div class="ychips" id="ychips"><button class="dchip on" data-w="world" type="button">World</button><button class="dchip" data-w="india" type="button">India</button></div>
+  <div class="yctl"><div class="ychips" id="ychips"><button class="dchip on" data-w="world" type="button">World</button><button class="dchip" data-w="india" type="button">India</button></div><label class="yslide" for="ymin">Or try yours <input id="ymin" type="range" min="0" max="480" step="1" value="141"><output id="ymo" for="ymin">141 min a day</output></label></div>
   <div class="ydots" id="ydots" aria-hidden="true"></div>
   <p class="ysrc" id="yS"></p>
 </div></div></div></section>
+
+<section id="night" aria-label="One night with Stay Clean"><div class="ntall" id="ntall"><div class="wrap nsticky" id="nstage">
+  <div class="nleft">
+    <div class="eyebrow">One night, start to finish</div>
+    <div class="nbig" id="nBig" aria-hidden="true">10:58 PM</div>
+    <div class="nchap" id="nchap"><article class="nc on" data-i="0"><span class="nct">Set it once</span><h3>You set it once.</h3><p>Switch on the night lock. That is the only thing you ever do.</p></article><article class="nc" data-i="1"><span class="nct">Night lock</span><h3>The scroll runs out of road.</h3><p>From 11 pm, Instagram and X rest until morning. One more reel stays one more reel.</p></article><article class="nc" data-i="2"><span class="nct">Midnight order</span><h3>The craving arrives. The order does not.</h3><p>Swiggy and Zomato close from 12 to 5 am, and the screen goes calm before you can order.</p></article><article class="nc" data-i="3"><span class="nct">Browser</span><h3>Even the quiet corners.</h3><p>Adult sites close silently in the browser. Incognito too, with no message and no drama.</p></article><article class="nc" data-i="4"><span class="nct">Morning</span><h3>Morning. All yours.</h3><p>Everything opens again. You slept, and that was the whole point.</p></article></div>
+    <div class="nrail" id="nrail" role="tablist" aria-label="Jump to a moment of the night"><button class="nr-b on" type="button" data-i="0" aria-label="Set it once, 10:58 PM">10:58<span style="opacity:.6"> PM</span></button><button class="nr-b" type="button" data-i="1" aria-label="Night lock, 11:04 PM">11:04<span style="opacity:.6"> PM</span></button><button class="nr-b" type="button" data-i="2" aria-label="Midnight order, 12:41 AM">12:41<span style="opacity:.6"> AM</span></button><button class="nr-b" type="button" data-i="3" aria-label="Browser, 2:18 AM">2:18<span style="opacity:.6"> AM</span></button><button class="nr-b" type="button" data-i="4" aria-label="Morning, 5:00 AM">5:00<span style="opacity:.6"> AM</span></button></div>
+  </div>
+  <div class="nwrap"><div class="nph" id="nph">
+    <div class="nscale" id="nscale"><div class="phone nphone" id="nPhone" aria-label="Animated recreation of the Stay Clean app, following one night"><div class="bezel"><div class="notch"></div><div class="status"><span id="nclk">10:58 PM</span><span>IST</span></div><div class="screen" id="nscreen"></div></div></div></div>
+  </div></div>
+</div></div></section>
+
 
 
 <section id="outcomes" style="padding-top:70px"><div class="wrap">
@@ -1020,6 +1091,70 @@ if(reduce){ // still frame: the cover
   set(homeHTML());add(coverHTML()).classList.add('on');$('.line',screen).textContent='Sleep is the better order.';scap.innerHTML='<b>Midnight order</b>'+SCENES.food.d;
 }else loop();
 
+
+/* ---------- one night: pinned scroll story ---------- */
+(()=>{
+const sec=$('#night');if(!sec)return;
+const tall=$('#ntall'),stage=$('#nstage'),ns=$('#nscreen'),nclk=$('#nclk'),big=$('#nBig'),chs=$$('.nc',sec),rail=$$('.nr-b',sec),ph=$('#nph');
+const T=[1378,1384,1481,1578,1740];
+const fmt=m=>{m=Math.round(m)%1440;let h=Math.floor(m/60),mm=m%60,ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+String(mm).padStart(2,'0')+' '+ap};
+const nset=h=>{ns.innerHTML=h},nadd=h=>{ns.insertAdjacentHTML('beforeend',h);return ns.lastElementChild};
+let nt=0;const nsl=(ms,my)=>new Promise((res,rej)=>setTimeout(()=>my===nt?res():rej(),ms));
+async function ntap(my,sel){
+  const home=$('.home',ns),t=$(sel,home),tp=$('.tap',home);if(!t||!tp)return;
+  const hr=home.getBoundingClientRect(),r=t.getBoundingClientRect();
+  const x=(r.left-hr.left+r.width/2),y=(r.top-hr.top+r.height/2);
+  tp.style.left=x+'px';tp.style.top=(y-8)+'px';tp.classList.remove('go');void tp.offsetWidth;tp.classList.add('go');
+  ns.style.setProperty('--ox',x+'px');ns.style.setProperty('--oy',y+'px');await nsl(260,my);
+}
+const ncover=(line,silent)=>{const c=nadd(coverHTML(silent));$('.line',c).textContent=line||'';void c.offsetWidth;c.classList.add('on');return c};
+async function nhome(my,c){$$('.app,.sett,.browser,.timer,.home',ns).forEach(n=>n.remove());c.insertAdjacentHTML('beforebegin',homeHTML());c.classList.remove('on');await nsl(450,my)}
+const CH=[
+ async my=>{nset(`<div class="view sett"><h3>STAY CLEAN</h3><p>Swiggy and Zomato stay closed<br>from 12 am to 5 am IST.</p><div class="row" style="margin-top:22px"><div><b>Night lock</b><small>Instagram and X, 11 pm to 5 am</small></div><span class="tog" id="ntg"></span></div><div class="row"><div><b>Instagram limit</b><small>5 minutes in every 30</small></div><small style="color:#777">Always</small></div><div class="secl">SETUP</div><div class="step"><span>1</span>Notifications<em>On</em></div><div class="step"><span>2</span>Cover screen<em>On</em></div><div class="step"><span>3</span>Backup guard<em>On</em></div><div class="step"><span>4</span>Lock uninstall<em>On</em></div><div class="step"><span>5</span>Stay alive<em>On</em></div><div class="step"><span>6</span>Guard<em>On</em></div></div>`);await nsl(900,my);$('#ntg',ns).classList.add('on');await nsl(2600,my)},
+ async my=>{nset(feedHTML());const rl=$('.reels',ns),cards=$$('.reel',rl);
+   for(let i=1;i<=3;i++){await nsl(i===1?900:650,my);rl.style.transform='translateY(-'+(i*100)+'%)';
+     if(i===2){await nsl(420,my);const c=cards[i];$('.ht',c).classList.add('on');const bh=$('.bigheart',c);bh.classList.remove('go');void bh.getBoundingClientRect();bh.classList.add('go')}}
+   await nsl(700,my);const c=ncover(nextSocial());await nsl(3000,my);await nhome(my,c);await nsl(600,my)},
+ async my=>{nset(homeHTML());await nsl(800,my);await ntap(my,'.tile[data-k="food"]');
+   const a=nadd(appHTML('food'));a.style.setProperty('--ox',ns.style.getPropertyValue('--ox'));a.style.setProperty('--oy',ns.style.getPropertyValue('--oy'));
+   await nsl(750,my);const c=ncover(nextFood());await nsl(3200,my);await nhome(my,c);await nsl(900,my)},
+ async my=>{nset(`<div class="view browser"><div class="addr"><span id="nad"></span><span class="caret"></span><em>Incognito</em></div><div class="card-sk" style="margin-top:18px"></div><div class="sk" style="width:80%"></div><div class="sk" style="width:55%"></div><div class="tabsw" id="ntc">3</div></div>`);const txt='blocked-site.example';for(const ch of txt){$('#nad',ns).textContent+=ch;await nsl(55,my)}
+   await nsl(500,my);const c=ncover('',true);await nsl(1500,my);await nhome(my,c);await nsl(900,my)},
+ async my=>{nset(homeHTML());nadd('<div class="morning"><b>Good morning</b><span>Everything is back.</span></div>');await nsl(1e9,my)}
+];
+let cur=-1,tmr=0,active=false;
+async function play(i){const my=++nt;try{while(true){await CH[i](my);await nsl(1800,my)}}catch(e){}}
+function show(i){
+  if(i===cur)return;cur=i;
+  chs.forEach((c,k)=>c.classList.toggle('on',k===i));
+  rail.forEach((b,k)=>{b.classList.toggle('on',k===i);b.classList.toggle('past',k<i);b.setAttribute('aria-selected',k===i)});
+  nt++;clearTimeout(tmr);nset('');tmr=setTimeout(()=>{if(active)play(i)},160);
+}
+const nsc=$('#nscale');
+function fit(){
+  const mob=innerWidth<=860,avail=innerHeight-64-(mob?330:70);
+  const w=Math.max(150,Math.min(mob?250:330,avail*.4918)),k=w/300;
+  ph.style.width=w+'px';ph.style.height=(w*610/300)+'px';nsc.style.transform='scale('+k.toFixed(4)+')';
+}
+fit();addEventListener('resize',fit);
+let lastT='';
+function upd(){
+  const r=tall.getBoundingClientRect(),range=r.height-(innerHeight-64);
+  const p=Math.max(0,Math.min(1,(64-r.top)/range));
+  const x=Math.max(0,Math.min(4,p*5-.5)),k=Math.min(3,Math.floor(x));
+  const t=fmt(T[k]+(T[k+1]-T[k])*(x-k));
+  if(t!==lastT){lastT=t;big.textContent=t;nclk.textContent=t}
+  stage.style.setProperty('--dawn',Math.max(0,Math.min(1,(p-.72)/.2)).toFixed(3));
+  ph.style.transform=`rotateY(${(Math.sin(p*Math.PI*2.2)*-11).toFixed(2)}deg) rotateX(${((p-.5)*-6).toFixed(2)}deg)`;
+  show(Math.min(4,Math.floor(p*5)));
+}
+if(reduce){nset(homeHTML());ncover('Sleep is the better order.');return}
+new IntersectionObserver(es=>{active=es[0].isIntersecting;if(!active){nt++;clearTimeout(tmr);cur=-1}else upd()},{rootMargin:'120px 0px'}).observe(tall);
+addEventListener('scroll',()=>{if(active)upd()},{passive:true});addEventListener('resize',()=>{if(active)upd()});
+rail.forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.i,r=tall.getBoundingClientRect(),range=r.height-(innerHeight-64);scrollTo({top:scrollY+r.top-64+((i+.5)/5)*range,behavior:'smooth'})}));
+upd();
+})();
+
 /* clock card in outcomes */
 (()=>{const el=$('#midc');if(!el)return;let m=0;setInterval(()=>{m=(m+7)%300;const h=Math.floor(m/60),mm=m%60;el.innerHTML=(h===0?12:h)+':'+String(mm).padStart(2,'0')+'<small>AM</small>'},900)})();
 
@@ -1321,22 +1456,33 @@ if(mq){mq.innerHTML=[...MQ,...MQ,...MQ,...MQ].map(([a,b])=>`<span>${a} <em>${b}<
 let mqx=0,lastY=scrollY,vel=0;
 const yt=$('#ytall'),yN=$('#yN'),yC=$('#yC'),yS=$('#yS'),yd=$('#ydots');
 const Y={
- world:{days:36,txt:'About 1 day in every 10 goes to social media.',src:'141 minutes a day on average, DataReportal and We Are Social, February 2025, via <a href="https://www.statista.com/statistics/433871/daily-social-media-usage-worldwide/" target="_blank" rel="noopener">Statista</a>. Days a year is our arithmetic.'},
- india:{days:49,txt:'More than 1 day in every 8 goes to social media.',src:'194 minutes a day on average, Esya Centre and IIM Ahmedabad, 2023 (2,000 people plus app data), via <a href="https://www.business-standard.com/technology/tech-news/average-indian-spends-194-minutes-daily-on-social-media-platforms-report-123081600607_1.html" target="_blank" rel="noopener">Business Standard</a>. Days a year is our arithmetic.'}
+ world:{mins:141,txt:'About 1 day in every 10 goes to social media.',src:'141 minutes a day on average, DataReportal and We Are Social, February 2025, via <a href="https://www.statista.com/statistics/433871/daily-social-media-usage-worldwide/" target="_blank" rel="noopener">Statista</a>. Days a year is our arithmetic.'},
+ india:{mins:194,txt:'More than 1 day in every 8 goes to social media.',src:'194 minutes a day on average, Esya Centre and IIM Ahmedabad, 2023 (2,000 people plus app data), via <a href="https://www.business-standard.com/technology/tech-news/average-indian-spends-194-minutes-daily-on-social-media-platforms-report-123081600607_1.html" target="_blank" rel="noopener">Business Standard</a>. Days a year is our arithmetic.'}
 };
-let who='world';
+let mins=141;
+const sl=$('#ymin'),so=$('#ymo');
 if(yd){yd.innerHTML=Array.from({length:372},(_,i)=>`<i class="${i>=365?'x':''}"></i>`).join('')}
 const dots=yd?$$('i',yd):[];
 let shown=-1;
+const daysOf=m=>Math.round(m*365/1440);
 function paintYear(p){
-  const D=Y[who].days;
+  const D=daysOf(mins);
   const e=reduce?1:Math.min(1,p*1.35);
   const n=Math.round(D*(1-Math.pow(1-e,2)));
   if(n!==shown){shown=n;yN.textContent=n;dots.forEach((d,i)=>d.classList.toggle('on',i<n))}
 }
-function setWho(w){who=w;shown=-1;yC.textContent=Y[w].txt;yS.innerHTML=Y[w].src;$$('#ychips .dchip').forEach(b=>b.classList.toggle('on',b.dataset.w===w));onScroll()}
-$$('#ychips .dchip').forEach(b=>b.addEventListener('click',()=>setWho(b.dataset.w)));
-if(yd)setWho('world');
+function setMins(m,w){
+  mins=m;shown=-1;
+  if(sl){sl.value=m;sl.style.setProperty('--f',(m/480*100)+'%');so.textContent=m+' min a day'}
+  $$('#ychips .dchip').forEach(b=>b.classList.toggle('on',b.dataset.w===w));
+  if(w){yC.textContent=Y[w].txt;yS.innerHTML=Y[w].src}
+  else{yC.textContent=m===0?'Nothing to lose. Lucky you.':'About 1 day in every '+Math.max(1,Math.round(1440/m))+' goes to social media.';
+       yS.textContent='Your own number. The sum is minutes a day × 365 ÷ 1,440, so it is only as true as the number you pick.'}
+  onScroll();
+}
+$$('#ychips .dchip').forEach(b=>b.addEventListener('click',()=>setMins(Y[b.dataset.w].mins,b.dataset.w)));
+if(sl)sl.addEventListener('input',()=>{const v=+sl.value;const w=v===141?'world':v===194?'india':null;setMins(v,w)});
+if(yd)setMins(141,'world');
 function onScroll(){
   const h=document.documentElement.scrollHeight-innerHeight;
   if(sp)sp.style.transform='scaleX('+(h>0?scrollY/h:0)+')';
@@ -1353,6 +1499,17 @@ if(!reduce&&mq){
   })();
 }
 
+
+/* ---------- cursor ring ---------- */
+(()=>{
+  const c=$('#cur');if(!c||reduce||!matchMedia('(hover:hover) and (pointer:fine)').matches)return;
+  let x=-100,y=-100,cx=-100,cy=-100,seen=false;
+  addEventListener('pointermove',e=>{x=e.clientX;y=e.clientY;if(!seen){seen=true;cx=x;cy=y;c.classList.add('on')}
+    c.classList.toggle('hot',!!e.target.closest('a,button,input,label,.orow,[role=tab],.stopcard,.pool *,summary'))},{passive:true});
+  addEventListener('pointerdown',()=>c.classList.add('dn'));addEventListener('pointerup',()=>c.classList.remove('dn'));
+  document.addEventListener('mouseleave',()=>c.classList.remove('on'));document.addEventListener('mouseenter',()=>seen&&c.classList.add('on'));
+  (function f(){cx+=(x-cx)*.2;cy+=(y-cy)*.2;c.style.transform=`translate3d(${cx.toFixed(1)}px,${cy.toFixed(1)}px,0)`;requestAnimationFrame(f)})();
+})();
 /* ---------- magnetic buttons ---------- */
 if(!reduce&&!touch){
   $$('.btn.p,.pill').forEach(b=>{
