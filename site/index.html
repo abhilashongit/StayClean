@@ -374,11 +374,11 @@ hr.sep{border:0;border-top:1px solid var(--line)}
 @media (max-width:520px){.shipped{grid-template-columns:1fr}.bub .bi{font-size:12.5px;padding:8px}}
 @media (prefers-reduced-motion:reduce){.stopcard{opacity:1;transform:none}.car-ring{animation:none}}
 /* idea dialog */
-dialog#ideadlg{border:1px solid var(--line2);border-radius:22px;background:#0a0a0a;color:var(--fg);padding:30px;width:min(520px,calc(100vw - 32px));margin:auto;box-shadow:0 40px 120px rgba(0,0,0,.8)}
-dialog#ideadlg::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(6px)}
-dialog#ideadlg[open]{animation:dlgin .35s var(--ease)}
+dialog#ideadlg,dialog#chaidlg{border:1px solid var(--line2);border-radius:22px;background:#0a0a0a;color:var(--fg);padding:30px;width:min(520px,calc(100vw - 32px));margin:auto;box-shadow:0 40px 120px rgba(0,0,0,.8)}
+dialog#ideadlg::backdrop,dialog#chaidlg::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(6px)}
+dialog#ideadlg[open],dialog#chaidlg[open]{animation:dlgin .35s var(--ease)}
 @keyframes dlgin{from{opacity:0;transform:translateY(14px) scale(.98)}}
-#ideadlg h3{font-weight:800;font-size:28px;letter-spacing:-.035em;margin:6px 0 6px}
+#ideadlg h3,#chaidlg h3{font-weight:800;font-size:28px;letter-spacing:-.035em;margin:6px 0 6px}
 .dsub{color:var(--mut);font-size:16.5px;margin-bottom:18px}
 #ideatxt{width:100%;resize:vertical;min-height:140px;max-height:320px;background:#050505;border:1px solid var(--line2);border-radius:14px;padding:14px 16px;color:#fff;font:500 16px/1.5 var(--main);transition:border-color .2s,box-shadow .2s}
 #ideatxt::placeholder{color:#666}
@@ -458,6 +458,14 @@ footer a:hover{color:#fff}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .js .rv{opacity:1;transform:none}
 }
+
+.chai{display:inline-block;margin-top:14px;font-family:var(--cap);font-weight:600;font-size:14px;color:var(--mut);border-bottom:1px solid var(--line2);padding-bottom:1px;transition:color .2s,border-color .2s}
+.chai:hover{color:#fff;border-color:#888}
+#chaidlg .cq{display:block;width:176px;height:176px;border-radius:14px;margin:6px 0 16px;background:#fff}
+#chaidlg ul{list-style:none;margin:0 0 18px;padding:0;color:var(--mut);font-size:15.5px;line-height:1.7}
+#chaidlg li::before{content:"—";color:var(--dim);margin-right:10px}
+#chaidlg .cphone{display:none}
+@media (hover:none) and (pointer:coarse),(max-width:760px){#chaidlg .cq,#chaidlg .cdesk{display:none}#chaidlg .cphone{display:inline-flex}}
 </style>
 </head>
 <body>
@@ -474,7 +482,7 @@ footer a:hover{color:#fff}
 
 <header class="hero" id="top"><div class="wrap hero-in">
   <div>
-    <a class="pill rv" href="https://github.com/abhilashongit/StayClean/releases/latest" target="_blank" rel="noopener"><b>v1.3</b> Android only · free and open source <span>→</span></a>
+    <a class="pill rv" href="https://github.com/abhilashongit/StayClean/releases/latest" target="_blank" rel="noopener"><b>v1.4</b> Android only · free and open source <span>→</span></a>
     <h1 class="rv" style="--d:.05s">Your nights,<br>back.</h1>
     <p class="lead rv" style="--d:.12s">Stay Clean quietly closes the doors you would rather keep shut after dark. <b>Deeper sleep, fewer regrets, a clearer morning.</b> No lectures, no streak guilt, just a calm black screen and one kind line.</p>
     <div class="cta rv" style="--d:.18s">
@@ -661,7 +669,7 @@ footer a:hover{color:#fff}
     <h2>Where it is going.</h2>
     <p class="sub">A direction, not a promise. Priorities follow what real people ask for. Tell us on GitHub.</p></div>
 
-  <div class="rm-h rv"><span class="tag now">Now</span> Shipped in v1.3</div>
+  <div class="rm-h rv"><span class="tag now">Now</span> Shipped in v1.4</div>
   <div class="shipped">
     <div class="item done rv"><b>Food-app curfew</b><small>Midnight to 5 am, with a calm black screen.</small></div>
     <div class="item done rv" style="--d:.04s"><b>Night lock</b><small>Instagram and X, 11 pm to 5 am, optional.</small></div>
@@ -680,7 +688,7 @@ footer a:hover{color:#fff}
       <g mask="url(#pm)"><path id="r_glow" class="r-glow" fill="none"/><path id="r_lit" class="r-lit" fill="none"/></g>
       <g id="car"><circle r="18" class="car-ring"/><rect x="-10" y="-6" width="20" height="12" rx="4" fill="#fff"/><rect x="2" y="-4" width="5" height="8" rx="1.5" fill="#000"/></g>
     </svg>
-    <div class="sign start" id="signstart"><b>You are here</b><span>v1.3 · shipped</span></div>
+    <div class="sign start" id="signstart"><b>You are here</b><span>v1.4 · shipped</span></div>
     <div class="stop" data-i="0"><span class="pin">1</span><div class="stopcard"><span class="tag2">Stop 1</span><b>Choose your own apps and hours</b><small>Pick what to guard and when, beyond the defaults, so Stay Clean fits your night, not just ours.</small></div></div>
     <div class="stop" data-i="1"><span class="pin">2</span><div class="stopcard"><span class="tag2">Stop 2</span><b>Any time zone</b><small>Schedules that follow you when you travel, so a trip never leaves a gap in the night.</small></div></div>
     <div class="stop" data-i="2"><span class="pin">3</span><div class="stopcard"><span class="tag2">Stop 3</span><b>More languages</b><small>Kind lines in Hindi and other languages, so the words land the way they should.</small></div></div>
@@ -704,7 +712,7 @@ footer a:hover{color:#fff}
     <div class="card rv" style="padding:30px 32px">
       <div class="compat"><span class="y">● Android 8.0 and up</span><span class="n">○ iPhone not supported</span></div>
       <ol class="steps">
-        <li><div><b>Download the APK</b><small>Open the latest release on your phone and tap stay-clean-v1.3.apk.</small></div></li>
+        <li><div><b>Download the APK</b><small>Open the latest release on your phone and tap stay-clean-v1.4.apk.</small></div></li>
         <li><div><b>Allow the install</b><small>If Android asks, let your browser install unknown apps.</small></div></li>
         <li><div><b>Choose “Install anyway”</b><small>Play Protect may warn because the app is new and uses Accessibility. Tap More details, then Install anyway.</small></div></li>
         <li><div><b>Finish the six setup rows</b><small>Do them top to bottom and do Guard last. If Guard is greyed out: Settings, Apps, Stay Clean, ⋮, Allow restricted settings.</small></div></li>
@@ -715,7 +723,7 @@ footer a:hover{color:#fff}
       <h3 style="margin-top:8px">Scan or tap.</h3>
       <img class="qr" src="/qr.svg" alt="QR code linking to the latest Stay Clean release on GitHub" width="168" height="168">
       <a class="btn p" style="margin-bottom:16px" href="https://github.com/abhilashongit/StayClean/releases/latest" target="_blank" rel="noopener">Get the APK on GitHub <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-      <button class="hash" id="hash" type="button" title="Click to copy"><span id="hashl">Copy SHA-256</span><code>4da816e181c4814624c0ec3641016df15f81d0ac700f0bd8ccfecdacb3b36eb0</code></button>
+      <button class="hash" id="hash" type="button" title="Click to copy"><span id="hashl">Copy SHA-256</span><code>69f11875efa6f560d2232c6bbaafc60667f58cc728b57eb5cacab7e30842ef9f</code></button>
       <p class="cap" style="margin-top:12px;font-size:13px">Compare this with the checksum on the release page before you install.</p>
     </div>
   </div>
@@ -742,13 +750,25 @@ footer a:hover{color:#fff}
 
 <footer><div class="wrap">
   <div class="foot">
-    <div><a href="#top" class="brand" style="color:#fff;padding:0"><i></i>Stay Clean</a><p class="cap" style="margin-top:14px;max-width:22em">A quiet guard for late nights. Android only.</p></div>
+    <div><a href="#top" class="brand" style="color:#fff;padding:0"><i></i>Stay Clean</a><p class="cap" style="margin-top:14px;max-width:22em">A quiet guard for late nights. Android only.</p><button type="button" class="chai" id="openchai">Buy me a chai · ₹10</button></div>
     <div><h5>Product</h5><a href="#outcomes">Outcomes</a><a href="#why">Why it is better</a><a href="#battery">Battery</a><a href="#roadmap">Roadmap</a><a href="#install">Install</a></div>
     <div><h5>Project</h5><a href="https://github.com/abhilashongit/StayClean" target="_blank" rel="noopener">GitHub</a><a href="https://github.com/abhilashongit/StayClean/releases" target="_blank" rel="noopener">Releases</a><a href="https://github.com/abhilashongit/StayClean/blob/main/docs/PRIVACY.md" target="_blank" rel="noopener">Privacy</a><a href="https://github.com/abhilashongit/StayClean/issues" target="_blank" rel="noopener">Report an issue</a></div>
     <div><h5>Legal</h5><a href="https://github.com/abhilashongit/StayClean/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a><a href="/licenses/Inter-OFL.txt">Inter font licence</a></div>
   </div>
   <p class="fine">Screens on this page are animated recreations of the app's real behaviour and wording, not screen recordings. Stay Clean is an independent project and is not affiliated with or endorsed by Swiggy, Zomato, Instagram, X, Google or Meta; all names belong to their owners. Research summaries are for context only and are not medical advice. Type: Manrope and Nunito (SIL OFL), Inter inside the phone screens.</p>
 </div></footer>
+
+<dialog id="chaidlg" aria-labelledby="chait">
+  <button type="button" class="dx" id="chaix" aria-label="Close"><i></i></button>
+  <div class="cap">Support</div>
+  <h3 id="chait">Buy me a chai, ₹10.</h3>
+  <p class="dsub">Stay Clean is free and always will be. If it helped, ₹10 once is plenty. It goes toward:</p>
+  <ul><li>Development costs</li><li>A fund for the App Store developer programme</li><li>One cup of coffee for the late-night coding</li></ul>
+  <img class="cq" src="/upi.svg" alt="UPI QR code for a ₹10 payment" width="176" height="176">
+  <a class="btn p cphone" href="upi://pay?pa=theabhilashkar@okhdfcbank&pn=Stay%20Clean&am=10.00&cu=INR&tn=Stay%20Clean%20support">Pay ₹10 with UPI</a>
+  <p class="fine2 cdesk">Scan with any UPI app. UPI ID: theabhilashkar@okhdfcbank</p>
+  <p class="fine2" style="margin-top:12px">Totally optional. Thank you either way.</p>
+</dialog>
 
 <dialog id="ideadlg" aria-labelledby="ideat">
   <form id="ideaform" method="dialog" novalidate>
@@ -1150,6 +1170,11 @@ $('.q').classList.add('open');
 })();
 
 
+/* chai */
+(()=>{const d=$('#chaidlg'),o=$('#openchai');if(!d||!o)return;
+o.addEventListener('click',()=>{try{d.showModal()}catch(e){d.setAttribute('open','')}});
+$('#chaix').addEventListener('click',()=>d.close());
+d.addEventListener('click',e=>{if(e.target===d)d.close()});})();
 /* idea box */
 (()=>{
   const dlg=$('#ideadlg'),open=$('#openidea');if(!dlg||!open)return;
