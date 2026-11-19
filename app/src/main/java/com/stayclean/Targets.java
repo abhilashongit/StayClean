@@ -80,10 +80,32 @@ public final class Targets {
         return false;
     }
 
+    /** The system screen that installs, updates and removes apps. */
+    public static boolean isInstaller(String pkg) {
+        return pkg != null && pkg.toLowerCase(Locale.ROOT).contains("packageinstaller");
+    }
+
+    /** Words on an uninstall screen. Install and update screens never say these. */
+    public static boolean matchesUninstallText(CharSequence text) {
+        if (text == null) return false;
+        String t = text.toString().toLowerCase(Locale.ROOT);
+        return t.contains("uninstall") || t.contains("remove app");
+    }
+
     /** The single rule that decides whether a window in the foreground must be covered and closed. */
     public static Decision decide(String pkg, boolean blockedNow, boolean tamperLockNow, boolean screenHasTamperText) {
+        return decide(pkg, blockedNow, tamperLockNow, screenHasTamperText, true);
+    }
+
+    /**
+     * In the package installer only an uninstall screen is tampering. Installing or updating Stay Clean
+     * is always allowed: Android only accepts an update signed with the same key, and never a downgrade.
+     */
+    public static Decision decide(String pkg, boolean blockedNow, boolean tamperLockNow,
+                                  boolean screenHasTamperText, boolean screenHasUninstallText) {
         if (blockedNow && isBlockedApp(pkg)) return Decision.BLOCK;
-        if (tamperLockNow && isTamperHost(pkg) && screenHasTamperText) return Decision.BLOCK;
+        if (tamperLockNow && isTamperHost(pkg) && screenHasTamperText
+                && (!isInstaller(pkg) || screenHasUninstallText)) return Decision.BLOCK;
         return Decision.IGNORE;
     }
 

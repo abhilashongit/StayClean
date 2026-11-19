@@ -28,6 +28,14 @@ public class WatchdogService extends Service {
     private final Handler h = new Handler(Looper.getMainLooper());
     private final FgTracker fg = new FgTracker();
     private long lastQuery;
+    static volatile boolean running;
+    private static volatile WatchdogService self;
+
+    /** Check right now (the guard just stopped), without restarting the service. */
+    static void poke() {
+        final WatchdogService w = self;
+        if (w != null) w.h.post(new Runnable() { @Override public void run() { w.h.removeCallbacks(w.tick); w.h.post(w.tick); } });
+    }
 
     private final Runnable tick = new Runnable() {
         @Override public void run() {
@@ -35,10 +43,10 @@ public class WatchdogService extends Service {
             try {
                 if (Util.phaseNow(WatchdogService.this) != Schedule.Phase.ACTIVE) { stopSelf(); return; }
                 if (GuardService.alive) {
-                    delay = 10_000;                           // primary is healthy: just a cheap liveness check
+                    delay = 60_000;                           // primary is healthy: a rare liveness check
                 } else if (Util.blockedNow(WatchdogService.this) || Util.socialNightNow(WatchdogService.this)) {
                     PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-                    if (pm.isInteractive()) { fallback(); delay = 600; } else delay = 5_000;
+                    if (pm.isInteractive()) { fallback(); delay = 800; } else delay = 30_000;
                 }
             } catch (Throwable ignored) {}
             h.postDelayed(this, delay);
@@ -47,6 +55,8 @@ public class WatchdogService extends Service {
 
     @Override public void onCreate() {
         super.onCreate();
+        running = true;
+        self = this;
         goForeground();
     }
 
@@ -128,6 +138,8 @@ public class WatchdogService extends Service {
     }
 
     @Override public void onDestroy() {
+        running = false;
+        self = null;
         h.removeCallbacks(tick);
         if (Util.phaseNow(this) == Schedule.Phase.ACTIVE) Util.armAlarm(this, 1500);   // died early: come back
         super.onDestroy();

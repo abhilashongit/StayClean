@@ -107,7 +107,7 @@ public class MainActivity extends Activity {
             ((LinearLayout.LayoutParams) hint.getLayoutParams()).topMargin = Overlay.dp(c, 20);
             col.addView(hint);
         }
-        TextView foot = Overlay.text(c, "Awake 10:55 pm to 5:05 am. Asleep the rest of the day.\nFrom 11 pm to 6 am, this app's settings pages stay shut.",
+        TextView foot = Overlay.text(c, "Awake 10:55 pm to 5:05 am. Asleep the rest of the day.\nFrom 11 pm to 6 am, this app's settings pages stay shut. Updates install any time.",
                 R.font.inter_light, 12, GRAY, 0.02f);
         foot.setGravity(Gravity.START);
         ((LinearLayout.LayoutParams) foot.getLayoutParams()).topMargin = Overlay.dp(c, 16);
@@ -207,7 +207,9 @@ public class MainActivity extends Activity {
     }
 
     private String diagText() {
-        StringBuilder s = new StringBuilder("v1.3");
+        String v = "";
+        try { v = "v" + getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Throwable ignored) {}
+        StringBuilder s = new StringBuilder(v);
         if (Diag.reads == 0 && Diag.misses == 0) s.append("\nBrowser check: no browser seen yet");
         else if (Diag.reads > 0) s.append("\nBrowser check: reading (").append(Diag.reads).append(")");
         else s.append("\nBrowser check: cannot read the address bar (").append(Diag.misses).append(")");

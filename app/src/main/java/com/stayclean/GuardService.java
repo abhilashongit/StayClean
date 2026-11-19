@@ -27,11 +27,17 @@ public class GuardService extends AccessibilityService {
     static volatile boolean alive;
     static volatile GuardService instance;
 
+    private static final long NIGHT_IDLE_MS = 15_000;        // safety re-check at night; events do the real work
+    private static final long IG_POLL_MS = 3_000;            // Instagram meter sampling
+    private static final long BROWSER_FAST_POLL_MS = 700, BROWSER_SLOW_POLL_MS = 1_500, BROWSER_FAST_MS = 10_000;
+
     private final Handler h = new Handler(Looper.getMainLooper());
     private Schedule.Phase applied;
     private volatile String lastPkg;
     private boolean lastWasIg, rxOn;
     private int igSamples;
+    private String lastUrl;
+    private long fastUntil;        // browsers: poll quickly until this time, then relax
 
     private final Runnable tick = new Runnable() {
         @Override public void run() {
@@ -99,7 +105,8 @@ public class GuardService extends AccessibilityService {
             enforce(pkg, Phrases.SOCIAL.next());
             return;
         }
-        if (Targets.isInstagram(pkg) || Targets.isBrowser(pkg)) { kick(); return; }
+        if (Targets.isBrowser(pkg)) { fastUntil = android.os.SystemClock.uptimeMillis() + BROWSER_FAST_MS; kick(); return; }
+        if (Targets.isInstagram(pkg)) { kick(); return; }
         if (Targets.isTamperHost(pkg) && Util.tamperLockNow(this)) {
             kick();                                   // check now, then keep checking while on this page
             h.removeCallbacks(oneShot);
@@ -114,24 +121,25 @@ public class GuardService extends AccessibilityService {
         boolean watch = blocked || social || lastWasIg || Targets.isInstagram(lp) || Targets.isBrowser(lp)
                 || (tamper && Targets.isTamperHost(lp));
         if (!watch) return -1;
-        long idle = (blocked || social) ? 5000 : -1;
+        long idle = (blocked || social) ? NIGHT_IDLE_MS : -1;
 
-        if (!interactive()) { endIgSession(); return idle; }
+        // Screen off: stop entirely. The SCREEN_ON / USER_PRESENT receiver wakes us the moment it matters.
+        if (!interactive()) { endIgSession(); return -1; }
         AccessibilityNodeInfo root = getRootInActiveWindow();
         String pkg = (root != null && root.getPackageName() != null) ? root.getPackageName().toString() : null;
         if (pkg == null || pkg.equals(getPackageName())) {
-            if (Targets.isBrowser(lp)) return 700;           // keep polling through transient empty screens
-            return lastWasIg ? 1000 : idle;
+            if (Targets.isBrowser(lp)) return BROWSER_FAST_POLL_MS;   // keep polling through transient empty screens
+            return lastWasIg ? IG_POLL_MS : idle;
         }
         lastPkg = pkg;
         if (lastWasIg && !Targets.isInstagram(pkg)) endIgSession();
         boolean busy = Overlay.busy();
 
-        if (blocked && Targets.isBlockedApp(pkg)) { if (!busy) enforce(pkg, null); return 5000; }
-        if (social && Targets.isSocialApp(pkg)) { if (!busy) enforce(pkg, Phrases.SOCIAL.next()); return 5000; }
+        if (blocked && Targets.isBlockedApp(pkg)) { if (!busy) enforce(pkg, null); return NIGHT_IDLE_MS; }
+        if (social && Targets.isSocialApp(pkg)) { if (!busy) enforce(pkg, Phrases.SOCIAL.next()); return NIGHT_IDLE_MS; }
 
         if (Targets.isInstagram(pkg)) {
-            if (busy) return 1000;
+            if (busy) return IG_POLL_MS;
             long now = Util.meterNow(this);
             UsageMeter m = Util.meter(this);
             UsageMeter.Verdict v = m.sample(now, true);
@@ -139,23 +147,28 @@ public class GuardService extends AccessibilityService {
                 lastWasIg = false;
                 Util.saveMeter(this);
                 enforce(pkg, "Back in " + m.lockoutMinutes(now) + " min.");
-            } else {
-                lastWasIg = true;
-                if (++igSamples % 15 == 0) Util.saveMeter(this);
+                return IG_POLL_MS;
             }
-            return 1000;
+            lastWasIg = true;
+            if (++igSamples % 5 == 0) Util.saveMeter(this);
+            // Relaxed sampling, but land right on the 5-minute mark instead of overshooting it.
+            return Math.max(250, Math.min(IG_POLL_MS, m.remainingMs() + 50));
         }
 
         if (Targets.isBrowser(pkg)) {
             String url = readUrl(root, pkg);
             Diag.onBrowserRead(pkg, url != null);
+            long up = android.os.SystemClock.uptimeMillis();
+            if (url != null && !url.equals(lastUrl)) { lastUrl = url; fastUntil = up + BROWSER_FAST_MS; }
             if (!busy && Adult.isAdult(url)) closeAdult(pkg, Adult.hostOf(url));
-            return 700;
+            // Fast right after the page or tab changes, relaxed while you read one page.
+            return up < fastUntil ? BROWSER_FAST_POLL_MS : BROWSER_SLOW_POLL_MS;
         }
 
         if (tamper && Targets.isTamperHost(pkg)) {
-            boolean hit = scan(root, new int[]{600}, 0);
-            if (Targets.decide(pkg, blocked, tamper, hit) == Targets.Decision.BLOCK && !busy) enforce(pkg, null);
+            int found = scan(root, new int[]{600}, 0, Targets.isInstaller(pkg));
+            if (Targets.decide(pkg, blocked, tamper, (found & HIT_TAMPER) != 0, (found & HIT_UNINSTALL) != 0)
+                    == Targets.Decision.BLOCK && !busy) enforce(pkg, null);
             return 1000;
         }
         return idle;
@@ -395,14 +408,21 @@ public class GuardService extends AccessibilityService {
         }, line);
     }
 
-    private static boolean scan(AccessibilityNodeInfo n, int[] budget, int depth) {
-        if (n == null || budget[0]-- <= 0 || depth > 30) return false;
-        if (Targets.matchesTamperText(n.getText()) || Targets.matchesTamperText(n.getContentDescription())) return true;
-        for (int i = 0; i < n.getChildCount(); i++) {
+    private static final int HIT_TAMPER = 1, HIT_UNINSTALL = 2;
+
+    /** Bit mask of what the page shows. In the installer we also look for uninstall wording. */
+    private static int scan(AccessibilityNodeInfo n, int[] budget, int depth, boolean installer) {
+        if (n == null || budget[0]-- <= 0 || depth > 30) return 0;
+        CharSequence t = n.getText(), d = n.getContentDescription();
+        int m = 0;
+        if (Targets.matchesTamperText(t) || Targets.matchesTamperText(d)) m |= HIT_TAMPER;
+        if (installer && (Targets.matchesUninstallText(t) || Targets.matchesUninstallText(d))) m |= HIT_UNINSTALL;
+        int want = installer ? (HIT_TAMPER | HIT_UNINSTALL) : HIT_TAMPER;
+        for (int i = 0; i < n.getChildCount() && (m & want) != want; i++) {
             AccessibilityNodeInfo c = n.getChild(i);
-            if (c != null && scan(c, budget, depth + 1)) return true;
+            if (c != null) m |= scan(c, budget, depth + 1, installer);
         }
-        return false;
+        return m;
     }
 
     @Override public void onInterrupt() {}
@@ -417,6 +437,7 @@ public class GuardService extends AccessibilityService {
 
     @Override public boolean onUnbind(Intent intent) {
         shutDown();
+        WatchdogService.poke();                       // the backup takes over at once
         Util.armAlarm(this, 3000);
         return super.onUnbind(intent);
     }

@@ -20,7 +20,7 @@ final class Util {
     private Util() {}
 
     static final String ACTION_KEEPALIVE = "com.stayclean.KEEPALIVE";
-    private static final long RESYNC_MS = 4 * 3_600_000L;
+    private static final long RESYNC_MS = 12 * 3_600_000L;   // one network check a night is plenty
     private static final AtomicBoolean syncing = new AtomicBoolean(false);
     private static volatile long lastSyncElapsed = -1;
     private static TrustedClock CLOCK;
@@ -166,6 +166,7 @@ final class Util {
     }
 
     static void startWatchdog(Context c) {
+        if (WatchdogService.running) { WatchdogService.poke(); return; }   // already on duty: no restart, no re-post
         Intent i = new Intent(c, WatchdogService.class);
         try {
             if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(i); else c.startService(i);

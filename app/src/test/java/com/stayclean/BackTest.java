@@ -102,6 +102,26 @@ public class BackTest {
         assertEquals(Targets.Decision.IGNORE, Targets.decide("com.whatsapp", true, true, true)); // text in a chat
     }
 
+    @Test public void updating_stay_clean_is_allowed_at_night_but_uninstalling_is_not() {
+        String[] installers = {"com.google.android.packageinstaller", "com.android.packageinstaller",
+                "com.miui.packageinstaller", "com.samsung.android.packageinstaller"};
+        boolean night = Schedule.tamperLock(ist(0, 30, 0));
+        for (String p : installers) {
+            assertTrue(p, Targets.isInstaller(p));
+            // "Stay Clean · Do you want to update this app?" -> allowed
+            assertEquals(p, Targets.Decision.IGNORE, Targets.decide(p, true, night, true, false));
+            // "Do you want to uninstall this app?" -> still shut
+            assertEquals(p, Targets.Decision.BLOCK, Targets.decide(p, true, night, true, true));
+        }
+        assertFalse(Targets.isInstaller("com.android.settings"));
+        assertEquals(Targets.Decision.BLOCK, Targets.decide("com.android.settings", false, night, true, false));
+        assertTrue(Targets.matchesUninstallText("Do you want to uninstall this app?"));
+        assertTrue(Targets.matchesUninstallText("Uninstall"));
+        assertFalse(Targets.matchesUninstallText("Do you want to update this app?"));
+        assertFalse(Targets.matchesUninstallText("Do you want to install this app?"));
+        assertFalse(Targets.matchesUninstallText("App installed."));
+    }
+
     @Test public void tamper_text_matching() {
         assertTrue(Targets.matchesTamperText("Stay Clean"));
         assertTrue(Targets.matchesTamperText("STAY CLEAN, Accessibility service"));
@@ -232,8 +252,8 @@ public class BackTest {
         }
     }
 
-    @Test public void active_phase_keepalive_is_at_most_five_minutes() {
-        assertTrue(Schedule.nextAlarmDelayMs(ist(2, 0, 0)) <= 5 * 60_000L);
+    @Test public void active_phase_keepalive_is_at_most_fifteen_minutes() {
+        assertTrue(Schedule.nextAlarmDelayMs(ist(2, 0, 0)) <= 15 * 60_000L);
         assertTrue(Schedule.nextAlarmDelayMs(ist(14, 0, 0)) > 8 * 3_600_000L);   // day: sleeps until 22:55
     }
 

@@ -38,7 +38,7 @@ public final class Schedule {
     public enum Phase { DAY, TAMPER, ACTIVE }
 
     public static final long SLACK_MS = 300;
-    public static final long ACTIVE_KEEPALIVE_MS = 5 * 60_000L;
+    public static final long ACTIVE_KEEPALIVE_MS = 15 * 60_000L;   // the system restarts the guard itself; this is a backstop
     /** Phase boundaries as IST minute-of-day: 00:00, 05:00, 05:05, 06:00, 22:55. */
     private static final int[] BOUNDARIES_MIN = {0, 300, 305, 360, 1375};
 
@@ -70,7 +70,7 @@ public final class Schedule {
         return best;
     }
 
-    /** One alarm at a time: lands just after the next boundary; during ACTIVE also a 5-minute keep-alive. */
+    /** One alarm at a time: lands just after the next boundary; during ACTIVE also a 15-minute keep-alive. */
     public static long nextAlarmDelayMs(long epochMs) {
         long d = msToNextBoundary(epochMs) + SLACK_MS;
         if (phase(epochMs) == Phase.ACTIVE) d = Math.min(d, ACTIVE_KEEPALIVE_MS);
