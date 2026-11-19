@@ -10,7 +10,7 @@
 
 <p align="center">
   <img alt="Android 8.0+" src="https://img.shields.io/badge/Android-8.0%2B-000?logo=android&logoColor=white">
-  <img alt="Version 1.3" src="https://img.shields.io/badge/version-1.3-000">
+  <img alt="Version 1.4" src="https://img.shields.io/badge/version-1.4-000">
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-000">
   <img alt="No tracking" src="https://img.shields.io/badge/tracking-none-000">
   <img alt="Build" src="https://github.com/abhilashongit/StayClean/actions/workflows/build.yml/badge.svg">
@@ -48,7 +48,7 @@ Times are fixed to **India Standard Time (UTC+5:30)**. Stay Clean also checks a 
 
 ## Install on Android (2 minutes)
 
-1. On your phone, open the **[latest release](https://github.com/abhilashongit/StayClean/releases/latest)** and download **`stay-clean-v1.3.apk`**.
+1. On your phone, open the **[latest release](https://github.com/abhilashongit/StayClean/releases/latest)** and download **`stay-clean-v1.4.apk`**.
 2. Open the file. If Android asks, allow your browser to *install unknown apps*.
 3. If **Play Protect** warns you, tap **More details → Install anyway**. This is normal for apps outside the Play Store that use Accessibility ([why](docs/INSTALL.md#why-play-protect-warns)).
 4. Open **Stay Clean** and finish the six **SETUP** rows, top to bottom. Do **Guard** last.

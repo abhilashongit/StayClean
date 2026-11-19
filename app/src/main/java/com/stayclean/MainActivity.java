@@ -113,6 +113,13 @@ public class MainActivity extends Activity {
         ((LinearLayout.LayoutParams) foot.getLayoutParams()).topMargin = Overlay.dp(c, 16);
         col.addView(foot);
 
+        TextView chai = Overlay.text(c, "Buy me a chai \u00b7 \u20b910", R.font.inter_light, 12, Color.rgb(110, 110, 110), 0.02f);
+        chai.setGravity(Gravity.START);
+        chai.setPadding(0, Overlay.dp(c, 10), Overlay.dp(c, 16), Overlay.dp(c, 10));
+        ((LinearLayout.LayoutParams) chai.getLayoutParams()).topMargin = Overlay.dp(c, 14);
+        chai.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View x) { supportChai(); } });
+        col.addView(chai);
+
         TextView diag = Overlay.text(c, diagText(), R.font.inter_light, 11, Color.rgb(90, 90, 90), 0.02f);
         diag.setGravity(Gravity.START);
         ((LinearLayout.LayoutParams) diag.getLayoutParams()).topMargin = Overlay.dp(c, 24);
@@ -206,6 +213,19 @@ public class MainActivity extends Activity {
         else s.append("\nBrowser check: cannot read the address bar (").append(Diag.misses).append(")");
         if (Diag.lastAction.length() > 0) s.append("\nLast tab close: ").append(Diag.lastAction);
         return s.toString();
+    }
+
+    private void supportChai() {
+        Uri u = Uri.parse("upi://pay?pa=theabhilashkar@okhdfcbank&pn=Stay%20Clean&am=10.00&cu=INR&tn=Stay%20Clean%20support");
+        try {
+            startActivity(Intent.createChooser(new Intent(Intent.ACTION_VIEW, u), "Pay \u20b910 with"));
+        } catch (Throwable t) {
+            try {
+                android.content.ClipboardManager cm = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                cm.setPrimaryClip(android.content.ClipData.newPlainText("UPI ID", "theabhilashkar@okhdfcbank"));
+                android.widget.Toast.makeText(this, "UPI ID copied", android.widget.Toast.LENGTH_SHORT).show();
+            } catch (Throwable ignored) {}
+        }
     }
 
     private void open(Intent i) {
