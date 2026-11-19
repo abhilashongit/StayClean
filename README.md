@@ -11,6 +11,7 @@
 <p align="center">
   <img alt="Android 8.0+" src="https://img.shields.io/badge/Android-8.0%2B-000?logo=android&logoColor=white">
   <img alt="Version 1.4" src="https://img.shields.io/badge/version-1.4-000">
+  <a href="https://github.com/abhilashongit/StayClean/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/abhilashongit/StayClean/total?label=downloads&color=000&labelColor=000"></a>
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-000">
   <img alt="No tracking" src="https://img.shields.io/badge/tracking-none-000">
   <img alt="Build" src="https://github.com/abhilashongit/StayClean/actions/workflows/build.yml/badge.svg">
