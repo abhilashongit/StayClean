@@ -7,6 +7,8 @@ public final class Diag {
     public static volatile long lastReadAt;
     public static volatile int reads, misses;
     public static volatile String lastAction = "";
+    /** Reddit app: screens looked at, community pages recognised, adult communities closed. Counts only, never names. */
+    public static volatile int redditScans, redditPages, redditClosed;
 
     public static void onBrowserRead(String pkg, boolean ok) {
         browserPkg = pkg;

@@ -13,3 +13,8 @@ captures/
 keystore.properties
 *.jks
 *.keystore
+
+# reddit18 working files (plaintext lists never committed)
+tools/reddit18/*.json
+tools/reddit18/*.csv
+tools/reddit18/__pycache__/

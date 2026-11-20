@@ -30,6 +30,7 @@ public class GuardService extends AccessibilityService {
     private static final long NIGHT_IDLE_MS = 15_000;        // safety re-check at night; events do the real work
     private static final long IG_POLL_MS = 3_000;            // Instagram meter sampling
     private static final long BROWSER_FAST_POLL_MS = 700, BROWSER_SLOW_POLL_MS = 1_500, BROWSER_FAST_MS = 10_000;
+    private static final long REDDIT_FAST_POLL_MS = 1_000, REDDIT_SLOW_POLL_MS = 2_000;
 
     private final Handler h = new Handler(Looper.getMainLooper());
     private Schedule.Phase applied;
@@ -105,7 +106,9 @@ public class GuardService extends AccessibilityService {
             enforce(pkg, Phrases.SOCIAL.next());
             return;
         }
-        if (Targets.isBrowser(pkg)) { fastUntil = android.os.SystemClock.uptimeMillis() + BROWSER_FAST_MS; kick(); return; }
+        if (Targets.isBrowser(pkg) || RedditGuard.isRedditApp(pkg)) {
+            fastUntil = android.os.SystemClock.uptimeMillis() + BROWSER_FAST_MS; kick(); return;
+        }
         if (Targets.isInstagram(pkg)) { kick(); return; }
         if (Targets.isTamperHost(pkg) && Util.tamperLockNow(this)) {
             kick();                                   // check now, then keep checking while on this page
@@ -118,7 +121,7 @@ public class GuardService extends AccessibilityService {
     private long tickOnce() {
         String lp = lastPkg;
         boolean blocked = Util.blockedNow(this), tamper = Util.tamperLockNow(this), social = Util.socialNightNow(this);
-        boolean watch = blocked || social || lastWasIg || Targets.isInstagram(lp) || Targets.isBrowser(lp)
+        boolean watch = blocked || social || lastWasIg || Targets.isInstagram(lp) || Targets.isBrowser(lp) || RedditGuard.isRedditApp(lp)
                 || (tamper && Targets.isTamperHost(lp));
         if (!watch) return -1;
         long idle = (blocked || social) ? NIGHT_IDLE_MS : -1;
@@ -129,6 +132,7 @@ public class GuardService extends AccessibilityService {
         String pkg = (root != null && root.getPackageName() != null) ? root.getPackageName().toString() : null;
         if (pkg == null || pkg.equals(getPackageName())) {
             if (Targets.isBrowser(lp)) return BROWSER_FAST_POLL_MS;   // keep polling through transient empty screens
+            if (RedditGuard.isRedditApp(lp)) return REDDIT_SLOW_POLL_MS;
             return lastWasIg ? IG_POLL_MS : idle;
         }
         lastPkg = pkg;
@@ -161,8 +165,15 @@ public class GuardService extends AccessibilityService {
             long up = android.os.SystemClock.uptimeMillis();
             if (url != null && !url.equals(lastUrl)) { lastUrl = url; fastUntil = up + BROWSER_FAST_MS; }
             if (!busy && Adult.isAdult(url)) closeAdult(pkg, Adult.hostOf(url));
+            else if (!busy && redditUrlBlocked(url)) closeAdult(pkg, Adult.hostOf(url));
             // Fast right after the page or tab changes, relaxed while you read one page.
             return up < fastUntil ? BROWSER_FAST_POLL_MS : BROWSER_SLOW_POLL_MS;
+        }
+
+        if (RedditGuard.isRedditApp(pkg)) {
+            if (!busy) checkReddit(root);
+            long up = android.os.SystemClock.uptimeMillis();
+            return up < fastUntil ? REDDIT_FAST_POLL_MS : REDDIT_SLOW_POLL_MS;
         }
 
         if (tamper && Targets.isTamperHost(pkg)) {
@@ -280,7 +291,85 @@ public class GuardService extends AccessibilityService {
         try {
             AccessibilityNodeInfo r = getRootInActiveWindow();
             String p = (r != null && r.getPackageName() != null) ? r.getPackageName().toString() : null;
-            return p != null && Targets.isBrowser(p) && Adult.isAdult(readUrl(r, p));
+            if (p == null || !Targets.isBrowser(p)) return false;
+            String u = readUrl(r, p);
+            return Adult.isAdult(u) || redditUrlBlocked(u);
+        } catch (Throwable t) { return false; }
+    }
+
+    // ---------- Reddit: adult communities only (never single posts' tags, profiles or feeds) ----------
+    private void ensureRedditList() {
+        if (RedditGuard.listSize() >= 0) return;
+        try { RedditGuard.load(getResources().openRawResource(R.raw.reddit18)); }
+        catch (Throwable t) { RedditGuard.load(new java.io.ByteArrayInputStream(new byte[0])); }   // rules still work
+    }
+
+    private boolean redditUrlBlocked(String url) {
+        if (url == null || !url.toLowerCase(java.util.Locale.ROOT).contains("reddit.com")) return false;
+        ensureRedditList();
+        return RedditGuard.isBlockedUrl(url);
+    }
+
+    /** The adult community whose page is open in the Reddit app right now, or null. */
+    private String redditOpenAdult(AccessibilityNodeInfo root) {
+        if (root == null) return null;
+        ensureRedditList();
+        android.graphics.Rect b = new android.graphics.Rect();
+        root.getBoundsInScreen(b);
+        int h = Math.max(1, b.height() > 0 ? b.bottom : getResources().getDisplayMetrics().heightPixels);
+        RedditGuard.Screen s = new RedditGuard.Screen();
+        scanReddit(root, s, h, new int[]{250}, 0, b);
+        String name = s.openCommunity();
+        if (name != null) Diag.redditPages++;
+        return (name != null && RedditGuard.isAdultCommunity(name)) ? name : null;
+    }
+
+    /** Walks only the top of the screen (headers, buttons, Reddit's own 18+ gate), within a node budget. */
+    private static void scanReddit(AccessibilityNodeInfo n, RedditGuard.Screen s, int h, int[] budget, int depth, android.graphics.Rect b) {
+        if (n == null || budget[0]-- <= 0 || depth > 30) return;
+        n.getBoundsInScreen(b);
+        if (depth > 2 && b.top > h * 0.6f) return;               // below the fold: feeds and comments live there
+        float y = b.top / (float) h;
+        s.add(n.getText(), y);
+        s.add(n.getContentDescription(), y);
+        for (int i = 0; i < n.getChildCount() && budget[0] > 0; i++) scanReddit(n.getChild(i), s, h, budget, depth + 1, b);
+    }
+
+    private String redditLast; private long redditLastAt; private final ArrayDeque<Long> redditActs = new ArrayDeque<>();
+
+    private void checkReddit(AccessibilityNodeInfo root) {
+        Diag.redditScans++;
+        final String name = redditOpenAdult(root);
+        if (name == null) return;
+        long now = android.os.SystemClock.uptimeMillis();
+        if (name.equals(redditLast) && now - redditLastAt < 4000) return;     // one action per community per 4 s
+        redditLast = name; redditLastAt = now;
+        while (!redditActs.isEmpty() && now - redditActs.peekFirst() > 20_000) redditActs.pollFirst();
+        redditActs.addLast(now);
+        final boolean loop = redditActs.size() >= 3;                          // Back is not getting out: go Home
+        Diag.redditClosed++;
+        Overlay.cover(this, WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY, 4000, new Overlay.Work() {
+            @Override public void run(final Runnable done) {
+                if (loop) { performGlobalAction(GLOBAL_ACTION_HOME); Diag.lastAction = "Reddit: went home"; h.postDelayed(done, 350); return; }
+                performGlobalAction(GLOBAL_ACTION_BACK);
+                h.postDelayed(new Runnable() { @Override public void run() {
+                    if (!stillReddit(name)) { Diag.lastAction = "Reddit: stepped back"; done.run(); return; }
+                    performGlobalAction(GLOBAL_ACTION_BACK);
+                    h.postDelayed(new Runnable() { @Override public void run() {
+                        if (stillReddit(name)) { performGlobalAction(GLOBAL_ACTION_HOME); Diag.lastAction = "Reddit: went home"; }
+                        else Diag.lastAction = "Reddit: stepped back";
+                        h.postDelayed(done, 250);
+                    }}, 700);
+                }}, 700);
+            }
+        });
+    }
+
+    private boolean stillReddit(String name) {
+        try {
+            AccessibilityNodeInfo r = getRootInActiveWindow();
+            if (r == null || r.getPackageName() == null || !RedditGuard.isRedditApp(r.getPackageName().toString())) return false;
+            return name.equals(redditOpenAdult(r));
         } catch (Throwable t) { return false; }
     }
 

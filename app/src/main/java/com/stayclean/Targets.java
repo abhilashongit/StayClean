@@ -33,7 +33,7 @@ public final class Targets {
     /** What the accessibility service listens to by day: only these packages. */
     public static String[] dayFilter() {
         Set<String> all = new java.util.TreeSet<>();
-        all.addAll(BLOCKED_APPS); all.addAll(SOCIAL_NIGHT); all.addAll(BROWSERS);
+        all.addAll(BLOCKED_APPS); all.addAll(SOCIAL_NIGHT); all.addAll(BROWSERS); all.add(RedditGuard.APP);
         return all.toArray(new String[0]);
     }
 

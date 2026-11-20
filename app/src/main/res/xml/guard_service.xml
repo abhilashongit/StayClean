@@ -2,7 +2,7 @@
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/service_description"
     android:accessibilityEventTypes="typeWindowStateChanged"
-    android:packageNames="com.android.chrome,com.application.zomato,com.brave.browser,com.chrome.beta,com.chrome.canary,com.chrome.dev,com.duckduckgo.mobile.android,com.instagram.android,com.microsoft.emmx,com.opera.browser,com.sec.android.app.sbrowser,com.twitter.android,com.vivaldi.browser,in.swiggy.android,org.mozilla.fenix,org.mozilla.firefox,org.mozilla.firefox_beta"
+    android:packageNames="com.android.chrome,com.application.zomato,com.brave.browser,com.chrome.beta,com.chrome.canary,com.chrome.dev,com.duckduckgo.mobile.android,com.instagram.android,com.microsoft.emmx,com.opera.browser,com.reddit.frontpage,com.sec.android.app.sbrowser,com.twitter.android,com.vivaldi.browser,in.swiggy.android,org.mozilla.fenix,org.mozilla.firefox,org.mozilla.firefox_beta"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows|flagIncludeNotImportantViews"
     android:canRetrieveWindowContent="true"

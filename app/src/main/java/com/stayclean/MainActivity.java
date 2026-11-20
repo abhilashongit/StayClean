@@ -213,7 +213,9 @@ public class MainActivity extends Activity {
         if (Diag.reads == 0 && Diag.misses == 0) s.append("\nBrowser check: no browser seen yet");
         else if (Diag.reads > 0) s.append("\nBrowser check: reading (").append(Diag.reads).append(")");
         else s.append("\nBrowser check: cannot read the address bar (").append(Diag.misses).append(")");
-        if (Diag.lastAction.length() > 0) s.append("\nLast tab close: ").append(Diag.lastAction);
+        if (Diag.redditScans > 0) s.append("\nReddit check: ").append(Diag.redditScans).append(" looks, ")
+                .append(Diag.redditPages).append(" community pages, ").append(Diag.redditClosed).append(" closed");
+        if (Diag.lastAction.length() > 0) s.append("\nLast close: ").append(Diag.lastAction);
         return s.toString();
     }
 
