@@ -51,7 +51,10 @@ public class GuardService extends AccessibilityService {
         @Override public void run() { try { tickOnce(); } catch (Throwable ignored) {} }
     };
     private final BroadcastReceiver screenRx = new BroadcastReceiver() {
-        @Override public void onReceive(Context c, Intent i) { kick(); }
+        @Override public void onReceive(Context c, Intent i) {
+            if (i != null && Intent.ACTION_USER_PRESENT.equals(i.getAction())) Morning.onUnlock(GuardService.this);
+            kick();
+        }
     };
 
     @Override protected void onServiceConnected() {
@@ -150,7 +153,7 @@ public class GuardService extends AccessibilityService {
             if (v == UsageMeter.Verdict.BLOCK) {
                 lastWasIg = false;
                 Util.saveMeter(this);
-                enforce(pkg, "Back in " + m.lockoutMinutes(now) + " min.");
+                enforce(pkg, m.allowance() <= 0 ? "You set this to zero." : "Back in " + m.lockoutMinutes(now) + " min.");
                 return IG_POLL_MS;
             }
             lastWasIg = true;

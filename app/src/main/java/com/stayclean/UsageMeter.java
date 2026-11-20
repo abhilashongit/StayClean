@@ -13,8 +13,12 @@ public final class UsageMeter {
     public enum Verdict { ALLOW, BLOCK }
 
     private long start = -1, used = 0, last = -1;
+    private long allow = ALLOW_MS;                           // per-interval allowance, 0 to 7:30, set by the user
 
     public UsageMeter() {}
+
+    public synchronized void setAllowance(long ms) { allow = Math.max(0, ms); }
+    public synchronized long allowance() { return allow; }
     public UsageMeter(long start, long used) { this.start = start; this.used = Math.max(0, used); }
 
     /** Feed one observation. fg = the app is on screen right now (and the screen is on). */
@@ -23,13 +27,13 @@ public final class UsageMeter {
         if (!fg) {
             if (last >= 0 && start >= 0) used += credit(now - last);
             last = -1;
-            return used >= ALLOW_MS ? Verdict.BLOCK : Verdict.ALLOW;
+            return used >= allow ? Verdict.BLOCK : Verdict.ALLOW;
         }
-        if (start < 0) { start = now; used = 0; last = now; return Verdict.ALLOW; }
-        if (used >= ALLOW_MS) { last = -1; return Verdict.BLOCK; }
+        if (start < 0) { start = now; used = 0; last = now; return allow <= 0 ? Verdict.BLOCK : Verdict.ALLOW; }
+        if (used >= allow) { last = -1; return Verdict.BLOCK; }
         if (last >= 0) used += credit(now - last);
         last = now;
-        if (used >= ALLOW_MS) { last = -1; return Verdict.BLOCK; }
+        if (used >= allow) { last = -1; return Verdict.BLOCK; }
         return Verdict.ALLOW;
     }
 
@@ -43,7 +47,7 @@ public final class UsageMeter {
     public synchronized int lockoutMinutes(long now) { return (int) Math.max(1, (lockoutMs(now) + 59_999L) / 60_000L); }
 
     /** Allowance left in the current interval. */
-    public synchronized long remainingMs() { return Math.max(0, ALLOW_MS - used); }
+    public synchronized long remainingMs() { return Math.max(0, allow - used); }
 
     public synchronized long start() { return start; }
     public synchronized long used() { return used; }

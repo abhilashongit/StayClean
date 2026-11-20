@@ -84,8 +84,40 @@ final class Util {
         if (METER == null) {
             SharedPreferences sp = c.getApplicationContext().getSharedPreferences("meter", Context.MODE_PRIVATE);
             METER = new UsageMeter(sp.getLong("start", -1), sp.getLong("used", 0));
+            METER.setAllowance(socialLimitMs(c));
         }
         return METER;
+    }
+
+    // ---- Instagram allowance per 30 minutes: 0 to 7:30, one change a day ----
+    static long socialLimitMs(Context c) {
+        return SocialLimit.clamp(c.getApplicationContext().getSharedPreferences("cfg", Context.MODE_PRIVATE)
+                .getLong("limit_ms", SocialLimit.DEFAULT_MS));
+    }
+
+    private static long dayBySystem() { return Morning.dayOf(System.currentTimeMillis()); }
+    private static long dayByTrusted(Context c) {
+        long t = clock(c).trustedNow(SystemClock.elapsedRealtime(), bootId(c));
+        return t >= 0 ? Morning.dayOf(t) : dayBySystem();
+    }
+
+    /** Can the limit be set to next right now, and why not. */
+    static SocialLimit.Verdict checkSocialLimit(Context c, long next) {
+        long last = c.getApplicationContext().getSharedPreferences("cfg", Context.MODE_PRIVATE).getLong("limit_day", Long.MIN_VALUE);
+        return SocialLimit.check(socialLimitMs(c), next, last, dayBySystem(), dayByTrusted(c), tamperLockNow(c));
+    }
+
+    /** True once today's one change has been used. */
+    static boolean socialLimitChangedToday(Context c) {
+        long last = c.getApplicationContext().getSharedPreferences("cfg", Context.MODE_PRIVATE).getLong("limit_day", Long.MIN_VALUE);
+        return last == dayBySystem() || last == dayByTrusted(c);
+    }
+
+    static void setSocialLimit(Context c, long ms) {
+        long v = SocialLimit.clamp(ms);
+        c.getApplicationContext().getSharedPreferences("cfg", Context.MODE_PRIVATE).edit()
+                .putLong("limit_ms", v).putLong("limit_day", Math.max(dayBySystem(), dayByTrusted(c))).apply();
+        meter(c).setAllowance(v);
     }
 
     static void saveMeter(Context c) {

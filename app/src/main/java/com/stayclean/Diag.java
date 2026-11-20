@@ -9,6 +9,8 @@ public final class Diag {
     public static volatile String lastAction = "";
     /** Reddit app: screens looked at, community pages recognised, adult communities closed. Counts only, never names. */
     public static volatile int redditScans, redditPages, redditClosed;
+    /** Morning glow: times it has shown since the app process started. */
+    public static volatile int morningShown;
 
     public static void onBrowserRead(String pkg, boolean ok) {
         browserPkg = pkg;

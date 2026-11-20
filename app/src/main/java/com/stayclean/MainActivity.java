@@ -23,6 +23,7 @@ import android.widget.TextView;
 /** Minimal setup screen. Black, Inter, six rows. Do them top to bottom; Guard goes last. */
 public class MainActivity extends Activity {
     private static final int GRAY = Color.rgb(140, 140, 140);
+    private LimitSheet limitSheet;
 
     @Override protected void onCreate(Bundle b) {
         super.onCreate(b);
@@ -34,7 +35,12 @@ public class MainActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
+        if (limitSheet != null) limitSheet.abort();     // the screen is rebuilt below
         render();
+    }
+
+    @Override public void onBackPressed() {
+        if (limitSheet != null && limitSheet.isOpen()) limitSheet.dismiss(); else super.onBackPressed();
     }
 
     private void render() {
@@ -47,8 +53,16 @@ public class MainActivity extends Activity {
         col.setPadding(pad, Overlay.dp(c, 64), pad, Overlay.dp(c, 40));
         sv.addView(col, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
+        TextView proud = Overlay.text(c, "I\u2019m proud of you.", R.font.inter_semibold, 21, Color.WHITE, 0.0f);
+        proud.setGravity(Gravity.START);
+        col.addView(proud);
+        TextView rise = Overlay.text(c, "Keep rising.", R.font.inter_light, 21, GRAY, 0.0f);
+        rise.setGravity(Gravity.START);
+        col.addView(rise);
+
         TextView title = Overlay.text(c, "STAY CLEAN", R.font.inter_semibold, 28, Color.WHITE, 0.30f);
         title.setGravity(Gravity.START);
+        ((LinearLayout.LayoutParams) title.getLayoutParams()).topMargin = Overlay.dp(c, 40);
         col.addView(title);
 
         TextView sub = Overlay.text(c, "Swiggy and Zomato stay closed\nfrom 12 am to 5 am IST.", R.font.inter_light, 15, GRAY, 0.02f);
@@ -64,7 +78,19 @@ public class MainActivity extends Activity {
         col.addView(state);
 
         toggleRow(col);
-        infoRow(col, "Instagram limit", "5 minutes in every 30", "Always");
+        boolean usedToday = Util.socialLimitChangedToday(c);
+        LinearLayout limit = baseRow(col, "Instagram limit", SocialLimit.label(Util.socialLimitMs(c)) + " in every 30",
+                usedToday ? "Changed today" : "Change", !usedToday);
+        limit.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                if (Util.socialLimitChangedToday(MainActivity.this)) {
+                    android.widget.Toast.makeText(MainActivity.this, "Already changed today. Back tomorrow.", android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (limitSheet == null) limitSheet = new LimitSheet(MainActivity.this, new Runnable() { @Override public void run() { render(); } });
+                limitSheet.show();
+            }
+        });
         TextView setup = Overlay.text(c, "SETUP", R.font.inter_medium, 11, GRAY, 0.2f);
         setup.setGravity(Gravity.START);
         ((LinearLayout.LayoutParams) setup.getLayoutParams()).topMargin = Overlay.dp(c, 28);
@@ -215,6 +241,7 @@ public class MainActivity extends Activity {
         else s.append("\nBrowser check: cannot read the address bar (").append(Diag.misses).append(")");
         if (Diag.redditScans > 0) s.append("\nReddit check: ").append(Diag.redditScans).append(" looks, ")
                 .append(Diag.redditPages).append(" community pages, ").append(Diag.redditClosed).append(" closed");
+        if (Diag.morningShown > 0) s.append("\nMorning glow: shown ").append(Diag.morningShown).append("x");
         if (Diag.lastAction.length() > 0) s.append("\nLast close: ").append(Diag.lastAction);
         return s.toString();
     }
