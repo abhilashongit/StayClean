@@ -77,22 +77,31 @@ final class Util {
     /** The toggle may only be switched OFF between 6 am and 11 pm. */
     static boolean canDisableSocial(Context c) { return !tamperLockNow(c); }
 
-    // ---- Instagram 5-min-per-30 meter ----
-    private static UsageMeter METER;
+    // ---- Instagram and X meters: separate allowances per 30 minutes, app and website share one per service ----
+    private static final java.util.EnumMap<Social.Svc, UsageMeter> METERS = new java.util.EnumMap<>(Social.Svc.class);
 
-    static synchronized UsageMeter meter(Context c) {
-        if (METER == null) {
-            SharedPreferences sp = c.getApplicationContext().getSharedPreferences("meter", Context.MODE_PRIVATE);
-            METER = new UsageMeter(sp.getLong("start", -1), sp.getLong("used", 0));
-            METER.setAllowance(socialLimitMs(c));
+    static synchronized UsageMeter meter(Context c, Social.Svc svc) {
+        UsageMeter m = METERS.get(svc);
+        if (m == null) {
+            SharedPreferences sp = c.getApplicationContext().getSharedPreferences(svc.meterPrefs, Context.MODE_PRIVATE);
+            m = new UsageMeter(sp.getLong("start", -1), sp.getLong("used", 0));
+            m.setAllowance(socialLimitMs(c, svc));
+            METERS.put(svc, m);
         }
-        return METER;
+        return m;
     }
 
-    // ---- Instagram allowance per 30 minutes: 0 to 7:30, one change a day ----
-    static long socialLimitMs(Context c) {
-        return SocialLimit.clamp(c.getApplicationContext().getSharedPreferences("cfg", Context.MODE_PRIVATE)
-                .getLong("limit_ms", SocialLimit.DEFAULT_MS));
+    static void saveMeter(Context c, Social.Svc svc) {
+        UsageMeter m = meter(c, svc);
+        c.getApplicationContext().getSharedPreferences(svc.meterPrefs, Context.MODE_PRIVATE).edit()
+                .putLong("start", m.start()).putLong("used", m.used()).apply();
+    }
+
+    // ---- allowance per 30 minutes: 0 to 7:30, one change a day, per service ----
+    private static SharedPreferences cfg(Context c) { return c.getApplicationContext().getSharedPreferences("cfg", Context.MODE_PRIVATE); }
+
+    static long socialLimitMs(Context c, Social.Svc svc) {
+        return SocialLimit.clamp(cfg(c).getLong(svc.limitKey, SocialLimit.DEFAULT_MS));
     }
 
     private static long dayBySystem() { return Morning.dayOf(System.currentTimeMillis()); }
@@ -101,29 +110,20 @@ final class Util {
         return t >= 0 ? Morning.dayOf(t) : dayBySystem();
     }
 
-    /** Can the limit be set to next right now, and why not. */
-    static SocialLimit.Verdict checkSocialLimit(Context c, long next) {
-        long last = c.getApplicationContext().getSharedPreferences("cfg", Context.MODE_PRIVATE).getLong("limit_day", Long.MIN_VALUE);
-        return SocialLimit.check(socialLimitMs(c), next, last, dayBySystem(), dayByTrusted(c), tamperLockNow(c));
+    static SocialLimit.Verdict checkSocialLimit(Context c, Social.Svc svc, long next) {
+        long last = cfg(c).getLong(svc.dayKey, Long.MIN_VALUE);
+        return SocialLimit.check(socialLimitMs(c, svc), next, last, dayBySystem(), dayByTrusted(c), tamperLockNow(c));
     }
 
-    /** True once today's one change has been used. */
-    static boolean socialLimitChangedToday(Context c) {
-        long last = c.getApplicationContext().getSharedPreferences("cfg", Context.MODE_PRIVATE).getLong("limit_day", Long.MIN_VALUE);
+    static boolean socialLimitChangedToday(Context c, Social.Svc svc) {
+        long last = cfg(c).getLong(svc.dayKey, Long.MIN_VALUE);
         return last == dayBySystem() || last == dayByTrusted(c);
     }
 
-    static void setSocialLimit(Context c, long ms) {
+    static void setSocialLimit(Context c, Social.Svc svc, long ms) {
         long v = SocialLimit.clamp(ms);
-        c.getApplicationContext().getSharedPreferences("cfg", Context.MODE_PRIVATE).edit()
-                .putLong("limit_ms", v).putLong("limit_day", Math.max(dayBySystem(), dayByTrusted(c))).apply();
-        meter(c).setAllowance(v);
-    }
-
-    static void saveMeter(Context c) {
-        UsageMeter m = meter(c);
-        c.getApplicationContext().getSharedPreferences("meter", Context.MODE_PRIVATE).edit()
-                .putLong("start", m.start()).putLong("used", m.used()).apply();
+        cfg(c).edit().putLong(svc.limitKey, v).putLong(svc.dayKey, Math.max(dayBySystem(), dayByTrusted(c))).apply();
+        meter(c, svc).setAllowance(v);
     }
 
     /** Real time if we have an anchor for this boot, else the system clock. */

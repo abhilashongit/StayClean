@@ -11,6 +11,20 @@ public final class Diag {
     public static volatile int redditScans, redditPages, redditClosed;
     /** Morning glow: times it has shown since the app process started. */
     public static volatile int morningShown;
+    /** Reddit probe: the last few distinct screen headers seen in the Reddit app (newest first). */
+    public static final java.util.LinkedList<String> redditScreens = new java.util.LinkedList<>();
+    public static synchronized void redditScreen(String sig) {
+        if (sig == null || sig.isEmpty() || (!redditScreens.isEmpty() && redditScreens.getFirst().equals(sig))) return;
+        redditScreens.remove(sig);
+        redditScreens.addFirst(sig);
+        while (redditScreens.size() > 4) redditScreens.removeLast();
+    }
+    public static synchronized String redditScreensText() {
+        StringBuilder b = new StringBuilder();
+        for (String s : redditScreens) b.append("\n  \u2022 ").append(s);
+        return b.toString();
+    }
+    public static volatile int redditSearches;
 
     public static void onBrowserRead(String pkg, boolean ok) {
         browserPkg = pkg;

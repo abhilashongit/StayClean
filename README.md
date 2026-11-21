@@ -10,7 +10,7 @@
 
 <p align="center">
   <img alt="Android 8.0+" src="https://img.shields.io/badge/Android-8.0%2B-000?logo=android&logoColor=white">
-  <img alt="Version 1.7" src="https://img.shields.io/badge/version-1.7-000">
+  <img alt="Version 1.8" src="https://img.shields.io/badge/version-1.8-000">
   <a href="https://github.com/abhilashongit/StayClean/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/abhilashongit/StayClean/total?label=downloads&color=000&labelColor=000"></a>
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-000">
   <img alt="No tracking" src="https://img.shields.io/badge/tracking-none-000">
@@ -33,11 +33,12 @@ When you open a blocked app, the screen fades to black, says **STAY CLEAN**, add
 | | Feature | How it behaves |
 |---|---|---|
 | 🍜 | **Food-app curfew** | Swiggy and Zomato close the moment they open, **12:00 am to 5:00 am IST**. |
-| 🌙 | **Night lock** (toggle) | Instagram and X are held shut **11 pm to 5 am**. Once it is on at night, it stays on until morning. |
-| ⏱️ | **Instagram limit** | **5 minutes in every 30** to start. Set it anywhere from **0 to 7 min 30 sec** on a wheel; changeable once a day, and raising it opens from 6 am. Past the limit, you see *"Back in N min."* |
+| 🌙 | **Night lock** (toggle) | Instagram and X are held shut **11 pm to 5 am**, in the apps and on instagram.com, x.com and twitter.com in browsers. Once it is on at night, it stays on until morning. |
+| ⏱️ | **Instagram and X limits** | Each gets its own allowance in every 30 minutes, **5 minutes** to start. Set it anywhere from **0 to 7 min 30 sec** on a wheel; changeable once a day, and raising it opens from 6 am. Time on instagram.com and x.com counts toward the same allowance as the app. Past the limit, you see *"Back in N min."* |
 | 🌅 | **Morning glow** | The first unlock after 6 am (before noon) brings a soft warm glow over the bottom of the screen for a few seconds. Once a day. |
 | 🚫 | **Adult-site filter** | Close the tab quietly (Incognito included), then leave Chrome. No message, no trace. |
 | 🧭 | **Reddit, kept useful** | Adult communities close the moment they open, in the Reddit app or a browser. Ordinary communities, spoiler posts, profiles and your feed are left alone. In the app it steps back instead of closing Reddit. |
+| 🔎 | **Reddit search and Saved** | Searching adult words closes the search, in the Reddit app and in browsers. Saved pages on reddit.com close in browsers. |
 | 🔋 | **Easy on battery** | Sleeps through the day, wakes before the night window. |
 | 🔒 | **Hard to undo on a whim** | Uninstall needs Device Admin removed first. This app's settings pages stay shut from 11 pm to 6 am. |
 
@@ -51,7 +52,7 @@ Times are fixed to **India Standard Time (UTC+5:30)**. Stay Clean also checks a 
 
 ## Install on Android (2 minutes)
 
-1. On your phone, open the **[latest release](https://github.com/abhilashongit/StayClean/releases/latest)** and download **`stay-clean-v1.7.apk`**. Already on an older version? Install it over the top. Your settings stay, and updates are never blocked (on v1.4 or older, update between 6 am and 11 pm IST).
+1. On your phone, open the **[latest release](https://github.com/abhilashongit/StayClean/releases/latest)** and download **`stay-clean-v1.8.apk`**. Already on an older version? Install it over the top. Your settings stay, and updates are never blocked (on v1.4 or older, update between 6 am and 11 pm IST).
 2. Open the file. If Android asks, allow your browser to *install unknown apps*.
 3. If **Play Protect** warns you, tap **More details → Install anyway**. This is normal for apps outside the Play Store that use Accessibility ([why](docs/INSTALL.md#why-play-protect-warns)).
 4. Open **Stay Clean** and finish the six **SETUP** rows, top to bottom. Do **Guard** last.

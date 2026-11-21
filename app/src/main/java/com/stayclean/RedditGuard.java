@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 /**
  * Adult Reddit communities. Judges the COMMUNITY only: never a single post's NSFW tag (spoilers are safe),
- * never profiles, feeds or search.
+ * never profiles or feeds. Searches are judged by the words typed, and Saved pages in browsers are closed.
  *
  * Three checks, in order: an allowlist that always wins, precise name rules, and a packed list of
  * communities Reddit itself flags 18+ (scrambled 32-bit fingerprints, no readable names in the app).
@@ -156,10 +156,74 @@ public final class RedditGuard {
         return out;
     }
 
-    /** True if a browser address opens an adult community, or a post inside one. */
+    /** True if a browser address opens an adult community or a post in one, searches adult words, or opens Saved. */
     public static boolean isBlockedUrl(CharSequence url) {
         for (String n : communitiesInUrl(url)) if (isAdultCommunity(n)) return true;
+        return isAdultQuery(searchQueryOf(url), false) || isSavedUrl(url);
+    }
+
+    // ---------- search words ----------
+    /** Anywhere inside a word: unambiguous on their own. */
+    private static final String[] Q_PARTS = {"porn", "hentai", "nsfw", "onlyfans", "xxx", "rule34", "gonewild", "nude", "naked",
+            "pussy", "boob", "titties", "milf", "slut", "whore", "blowjob", "handjob", "deepthroat", "cumshot", "creampie",
+            "nipple", "upskirt", "camgirl", "erotic", "horny", "bdsm", "topless", "braless", "futanari", "yiff", "pawg",
+            "hotwife", "stripper", "lingerie", "thong"};
+    /** Whole words only (they hide inside ordinary words). */
+    private static final Set<String> Q_WORDS = new HashSet<>(Arrays.asList("sex", "sexy", "ass", "asses", "tits", "tit",
+            "cum", "lewd", "thot", "thots", "fetish", "booty", "nsfl", "r34", "escort", "escorts", "twerk", "twerking", "cuck"));
+
+    /**
+     * Does a search contain adult words? typing = the box still has the cursor, so its last word may be unfinished:
+     * a short last word ("sex" on the way to "sextant") waits until it is finished.
+     */
+    public static boolean isAdultQuery(CharSequence q, boolean typing) {
+        if (q == null) return false;
+        String s = q.toString().toLowerCase(Locale.ROOT);
+        if (s.trim().isEmpty()) return false;
+        for (String t : Q_PARTS) if (s.contains(t)) return true;
+        String[] w = s.split("[^a-z0-9]+");
+        boolean openEnd = typing && !s.isEmpty() && Character.isLetterOrDigit(s.charAt(s.length() - 1));
+        for (int i = 0; i < w.length; i++) {
+            if (w[i].isEmpty() || !Q_WORDS.contains(w[i])) continue;
+            if (openEnd && i == w.length - 1) continue;
+            return true;
+        }
         return false;
+    }
+
+    private static String redditPath(CharSequence text) {
+        String host = Adult.hostOf(text);
+        if (host == null || !(host.equals("reddit.com") || host.endsWith(".reddit.com"))) return null;
+        String s = text.toString().trim();
+        int scheme = s.indexOf("://");
+        if (scheme >= 0) s = s.substring(scheme + 3);
+        int slash = s.indexOf('/');
+        return slash < 0 ? "/" : s.substring(slash);
+    }
+
+    /** The words searched in a reddit.com address (/search?q=, /r/x/search?q=), or null. */
+    static String searchQueryOf(CharSequence url) {
+        if (url == null) return null;
+        String path = redditPath(url);
+        if (path == null) return null;
+        int qm = path.indexOf('?');
+        String route = (qm < 0 ? path : path.substring(0, qm)).toLowerCase(Locale.ROOT);
+        if (!route.contains("/search")) return null;
+        if (qm < 0) return null;
+        for (String kv : path.substring(qm + 1).split("&")) {
+            if (!kv.startsWith("q=")) continue;
+            try { return URLDecoder.decode(kv.substring(2), "UTF-8"); } catch (Exception e) { return kv.substring(2); }
+        }
+        return null;
+    }
+
+    private static final Pattern SAVED = Pattern.compile("^/(user|u)/[^/?#]+/saved(?:[/?#].*)?$", Pattern.CASE_INSENSITIVE);
+
+    /** reddit.com Saved pages (/user/name/saved, /u/name/saved). */
+    static boolean isSavedUrl(CharSequence url) {
+        if (url == null) return false;
+        String path = redditPath(url);
+        return path != null && SAVED.matcher(path).matches();
     }
 
     // ---------- Reddit app ----------
@@ -170,6 +234,24 @@ public final class RedditGuard {
         final Set<String> names = new HashSet<>();   // community names on short labels
         float topmost = 1f;                          // smallest y (0..1 of screen height) where a name sat
         boolean joinCue, statsCue, gateCue;
+        String query; boolean queryFocused;          // the search box, if one is on screen
+        final List<String> probe = new ArrayList<>(); // short labels near the top, for the diagnostics line
+
+        /** The search box (an editable field near the top). */
+        public void field(CharSequence text, boolean focused) {
+            if (text == null || text.length() == 0 || query != null) return;
+            query = text.toString(); queryFocused = focused;
+        }
+
+        /** Short labels and view ids near the top: tells us what Reddit calls its Search and Saved screens. */
+        public void probe(CharSequence label, float y) {
+            if (label == null || y > 0.25f || probe.size() >= 10) return;
+            String s = label.toString().replace('\n', ' ').trim();
+            if (s.length() < 2 || s.length() > 24 || probe.contains(s)) return;
+            probe.add(s);
+        }
+
+        public boolean adultSearch() { return isAdultQuery(query, queryFocused); }
 
         /** Feed one label: its text and how far down the screen its top edge is (0 = top). */
         public void add(CharSequence text, float y) {

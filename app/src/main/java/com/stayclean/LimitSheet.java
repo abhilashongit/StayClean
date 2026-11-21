@@ -21,6 +21,7 @@ final class LimitSheet {
 
     private final Activity act;
     private final Runnable onSaved;
+    private Social.Svc svc = Social.Svc.IG;
     private FrameLayout scrim;
     private LinearLayout sheet;
     private WheelView mins, secs;
@@ -31,10 +32,11 @@ final class LimitSheet {
 
     boolean isOpen() { return scrim != null && !closing; }
 
-    void show() {
+    void show(Social.Svc which) {
         if (scrim != null) return;
+        svc = which;
         final Context c = act;
-        long cur = Util.socialLimitMs(c);
+        long cur = Util.socialLimitMs(c, svc);
         int m = (int) (cur / 60_000L), s = (int) ((cur % 60_000L) / 30_000L);
         sound = new TickSound();
 
@@ -58,7 +60,7 @@ final class LimitSheet {
         head.setOrientation(LinearLayout.HORIZONTAL);
         head.setGravity(Gravity.CENTER_VERTICAL);
         TextView cancel = Overlay.text(c, "Cancel", R.font.inter_regular, 16, AMBER, 0f);
-        TextView title = Overlay.text(c, "Instagram time", R.font.inter_semibold, 16, Color.WHITE, 0f);
+        TextView title = Overlay.text(c, svc.label + " time", R.font.inter_semibold, 16, Color.WHITE, 0f);
         TextView save = Overlay.text(c, "Save", R.font.inter_semibold, 16, AMBER, 0f);
         cancel.setPadding(0, Overlay.dp(c, 8), Overlay.dp(c, 16), Overlay.dp(c, 8));
         save.setPadding(Overlay.dp(c, 16), Overlay.dp(c, 8), 0, Overlay.dp(c, 8));
@@ -70,7 +72,7 @@ final class LimitSheet {
         save.setGravity(Gravity.END);
         sheet.addView(head);
 
-        TextView sub = Overlay.text(c, "How long it stays open in every 30 minutes", R.font.inter_light, 13, GRAY, 0.01f);
+        TextView sub = Overlay.text(c, "How long it stays open in every 30 minutes, app and website together", R.font.inter_light, 13, GRAY, 0.01f);
         ((LinearLayout.LayoutParams) sub.getLayoutParams()).topMargin = Overlay.dp(c, 6);
         sheet.addView(sub);
 
@@ -125,14 +127,14 @@ final class LimitSheet {
 
     private void save() {
         long next = SocialLimit.clamp(chosenMs());
-        SocialLimit.Verdict v = Util.checkSocialLimit(act, next);
+        SocialLimit.Verdict v = Util.checkSocialLimit(act, svc, next);
         switch (v) {
             case SAME: dismiss(); return;
             case ALREADY_TODAY: toast("Already changed today. Back tomorrow."); return;
             case RAISE_AT_NIGHT: toast("Raising it opens at 6 am."); return;
             default: break;
         }
-        Util.setSocialLimit(act, next);
+        Util.setSocialLimit(act, svc, next);
         try { sheet.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING); } catch (Throwable ignored) {}
         dismiss();
         if (onSaved != null) act.getWindow().getDecorView().postDelayed(onSaved, 400);   // refresh the row after the sheet has slid away

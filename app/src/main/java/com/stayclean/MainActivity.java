@@ -78,19 +78,8 @@ public class MainActivity extends Activity {
         col.addView(state);
 
         toggleRow(col);
-        boolean usedToday = Util.socialLimitChangedToday(c);
-        LinearLayout limit = baseRow(col, "Instagram limit", SocialLimit.label(Util.socialLimitMs(c)) + " in every 30",
-                usedToday ? "Changed today" : "Change", !usedToday);
-        limit.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                if (Util.socialLimitChangedToday(MainActivity.this)) {
-                    android.widget.Toast.makeText(MainActivity.this, "Already changed today. Back tomorrow.", android.widget.Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (limitSheet == null) limitSheet = new LimitSheet(MainActivity.this, new Runnable() { @Override public void run() { render(); } });
-                limitSheet.show();
-            }
-        });
+        limitRow(col, Social.Svc.IG);
+        limitRow(col, Social.Svc.X);
         TextView setup = Overlay.text(c, "SETUP", R.font.inter_medium, 11, GRAY, 0.2f);
         setup.setGravity(Gravity.START);
         ((LinearLayout.LayoutParams) setup.getLayoutParams()).topMargin = Overlay.dp(c, 28);
@@ -205,6 +194,23 @@ public class MainActivity extends Activity {
         });
     }
 
+    private void limitRow(LinearLayout col, final Social.Svc svc) {
+        Context c = this;
+        boolean usedToday = Util.socialLimitChangedToday(c, svc);
+        LinearLayout row = baseRow(col, svc.label + " limit", SocialLimit.label(Util.socialLimitMs(c, svc)) + " in every 30",
+                usedToday ? "Changed today" : "Change", !usedToday);
+        row.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                if (Util.socialLimitChangedToday(MainActivity.this, svc)) {
+                    android.widget.Toast.makeText(MainActivity.this, "Already changed today. Back tomorrow.", android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (limitSheet == null) limitSheet = new LimitSheet(MainActivity.this, new Runnable() { @Override public void run() { render(); } });
+                limitSheet.show(svc);
+            }
+        });
+    }
+
     private void infoRow(LinearLayout parent, String label, String desc, String right) {
         baseRow(parent, label, desc, right, true);
     }
@@ -240,7 +246,9 @@ public class MainActivity extends Activity {
         else if (Diag.reads > 0) s.append("\nBrowser check: reading (").append(Diag.reads).append(")");
         else s.append("\nBrowser check: cannot read the address bar (").append(Diag.misses).append(")");
         if (Diag.redditScans > 0) s.append("\nReddit check: ").append(Diag.redditScans).append(" looks, ")
-                .append(Diag.redditPages).append(" community pages, ").append(Diag.redditClosed).append(" closed");
+                .append(Diag.redditPages).append(" community pages, ").append(Diag.redditClosed).append(" closed, ")
+                .append(Diag.redditSearches).append(" searches stopped");
+        if (!Diag.redditScreens.isEmpty()) s.append("\nReddit screens seen:").append(Diag.redditScreensText());
         if (Diag.morningShown > 0) s.append("\nMorning glow: shown ").append(Diag.morningShown).append("x");
         if (Diag.lastAction.length() > 0) s.append("\nLast close: ").append(Diag.lastAction);
         return s.toString();

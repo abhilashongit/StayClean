@@ -35,7 +35,8 @@ public class GuardService extends AccessibilityService {
     private final Handler h = new Handler(Looper.getMainLooper());
     private Schedule.Phase applied;
     private volatile String lastPkg;
-    private boolean lastWasIg, rxOn;
+    private boolean rxOn;
+    private Social.Svc meterSvc;                              // Instagram or X being timed right now (app or website)
     private int igSamples;
     private String lastUrl;
     private long fastUntil;        // browsers: poll quickly until this time, then relax
@@ -112,7 +113,7 @@ public class GuardService extends AccessibilityService {
         if (Targets.isBrowser(pkg) || RedditGuard.isRedditApp(pkg)) {
             fastUntil = android.os.SystemClock.uptimeMillis() + BROWSER_FAST_MS; kick(); return;
         }
-        if (Targets.isInstagram(pkg)) { kick(); return; }
+        if (Social.ofApp(pkg) != null) { kick(); return; }
         if (Targets.isTamperHost(pkg) && Util.tamperLockNow(this)) {
             kick();                                   // check now, then keep checking while on this page
             h.removeCallbacks(oneShot);
@@ -124,42 +125,33 @@ public class GuardService extends AccessibilityService {
     private long tickOnce() {
         String lp = lastPkg;
         boolean blocked = Util.blockedNow(this), tamper = Util.tamperLockNow(this), social = Util.socialNightNow(this);
-        boolean watch = blocked || social || lastWasIg || Targets.isInstagram(lp) || Targets.isBrowser(lp) || RedditGuard.isRedditApp(lp)
+        boolean watch = blocked || social || meterSvc != null || Social.ofApp(lp) != null || Targets.isBrowser(lp) || RedditGuard.isRedditApp(lp)
                 || (tamper && Targets.isTamperHost(lp));
         if (!watch) return -1;
         long idle = (blocked || social) ? NIGHT_IDLE_MS : -1;
 
         // Screen off: stop entirely. The SCREEN_ON / USER_PRESENT receiver wakes us the moment it matters.
-        if (!interactive()) { endIgSession(); return -1; }
+        if (!interactive()) { endMeterSession(); return -1; }
         AccessibilityNodeInfo root = getRootInActiveWindow();
         String pkg = (root != null && root.getPackageName() != null) ? root.getPackageName().toString() : null;
         if (pkg == null || pkg.equals(getPackageName())) {
             if (Targets.isBrowser(lp)) return BROWSER_FAST_POLL_MS;   // keep polling through transient empty screens
             if (RedditGuard.isRedditApp(lp)) return REDDIT_SLOW_POLL_MS;
-            return lastWasIg ? IG_POLL_MS : idle;
+            return meterSvc != null ? IG_POLL_MS : idle;
         }
         lastPkg = pkg;
-        if (lastWasIg && !Targets.isInstagram(pkg)) endIgSession();
+        if (meterSvc != null && !Targets.isBrowser(pkg) && Social.ofApp(pkg) != meterSvc) endMeterSession();
         boolean busy = Overlay.busy();
 
         if (blocked && Targets.isBlockedApp(pkg)) { if (!busy) enforce(pkg, null); return NIGHT_IDLE_MS; }
         if (social && Targets.isSocialApp(pkg)) { if (!busy) enforce(pkg, Phrases.SOCIAL.next()); return NIGHT_IDLE_MS; }
 
-        if (Targets.isInstagram(pkg)) {
+        Social.Svc app = Social.ofApp(pkg);
+        if (app != null) {
             if (busy) return IG_POLL_MS;
-            long now = Util.meterNow(this);
-            UsageMeter m = Util.meter(this);
-            UsageMeter.Verdict v = m.sample(now, true);
-            if (v == UsageMeter.Verdict.BLOCK) {
-                lastWasIg = false;
-                Util.saveMeter(this);
-                enforce(pkg, m.allowance() <= 0 ? "You set this to zero." : "Back in " + m.lockoutMinutes(now) + " min.");
-                return IG_POLL_MS;
-            }
-            lastWasIg = true;
-            if (++igSamples % 5 == 0) Util.saveMeter(this);
-            // Relaxed sampling, but land right on the 5-minute mark instead of overshooting it.
-            return Math.max(250, Math.min(IG_POLL_MS, m.remainingMs() + 50));
+            long wait = meterTick(app);
+            if (wait < 0) { enforce(pkg, lockLine(app)); return IG_POLL_MS; }
+            return wait;
         }
 
         if (Targets.isBrowser(pkg)) {
@@ -167,10 +159,20 @@ public class GuardService extends AccessibilityService {
             Diag.onBrowserRead(pkg, url != null);
             long up = android.os.SystemClock.uptimeMillis();
             if (url != null && !url.equals(lastUrl)) { lastUrl = url; fastUntil = up + BROWSER_FAST_MS; }
+            long poll = up < fastUntil ? BROWSER_FAST_POLL_MS : BROWSER_SLOW_POLL_MS;
+            Social.Svc web = Social.ofUrl(url);
+            if (url != null && meterSvc != null && web != meterSvc) endMeterSession();   // left the site (or switched)
             if (!busy && Adult.isAdult(url)) closeAdult(pkg, Adult.hostOf(url));
             else if (!busy && redditUrlBlocked(url)) closeAdult(pkg, Adult.hostOf(url));
+            else if (web != null && !busy) {
+                // instagram.com / x.com: closed at night, and timed into the same allowance as the app by day
+                if (social) { Diag.lastAction = web.label + " website: night lock"; closeAdult(pkg, Adult.hostOf(url)); return poll; }
+                long wait = meterTick(web);
+                if (wait < 0) { Diag.lastAction = web.label + " website: time used"; closeAdult(pkg, Adult.hostOf(url)); return poll; }
+                return Math.min(poll, wait);
+            }
             // Fast right after the page or tab changes, relaxed while you read one page.
-            return up < fastUntil ? BROWSER_FAST_POLL_MS : BROWSER_SLOW_POLL_MS;
+            return poll;
         }
 
         if (RedditGuard.isRedditApp(pkg)) {
@@ -188,13 +190,42 @@ public class GuardService extends AccessibilityService {
         return idle;
     }
 
-    private void endIgSession() {
-        if (!lastWasIg) return;
-        lastWasIg = false;
+    /** One foreground sample for svc. Returns ms until the next sample, or -1 when its time is used up. */
+    private long meterTick(Social.Svc svc) {
+        if (meterSvc != null && meterSvc != svc) endMeterSession();
+        long now = Util.meterNow(this);
+        UsageMeter m = Util.meter(this, svc);
+        if (m.sample(now, true) == UsageMeter.Verdict.BLOCK) {
+            meterSvc = null;
+            Util.saveMeter(this, svc);
+            return -1;
+        }
+        meterSvc = svc;
+        if (++igSamples % 5 == 0) Util.saveMeter(this, svc);
+        // Relaxed sampling, but land right on the limit instead of overshooting it.
+        return Math.max(250, Math.min(IG_POLL_MS, m.remainingMs() + 50));
+    }
+
+    private String lockLine(Social.Svc svc) {
+        UsageMeter m = Util.meter(this, svc);
+        return m.allowance() <= 0 ? "You set this to zero." : "Back in " + m.lockoutMinutes(Util.meterNow(this)) + " min.";
+    }
+
+    private void endMeterSession() {
+        Social.Svc svc = meterSvc;
+        if (svc == null) return;
+        meterSvc = null;
         try {
-            Util.meter(this).sample(Util.meterNow(this), false);
-            Util.saveMeter(this);
+            Util.meter(this, svc).sample(Util.meterNow(this), false);
+            Util.saveMeter(this, svc);
         } catch (Throwable ignored) {}
+    }
+
+    /** instagram.com or x.com while it should be closed (night lock, or its time is used up). */
+    private boolean socialUrlBlocked(String url) {
+        Social.Svc svc = Social.ofUrl(url);
+        if (svc == null) return false;
+        return Util.socialNightNow(this) || Util.meter(this, svc).lockedAt(Util.meterNow(this));
     }
 
     // ---------- adult sites: silent. Black screen, close the TAB through Chrome's own UI, then Home, then kill ----------
@@ -296,7 +327,7 @@ public class GuardService extends AccessibilityService {
             String p = (r != null && r.getPackageName() != null) ? r.getPackageName().toString() : null;
             if (p == null || !Targets.isBrowser(p)) return false;
             String u = readUrl(r, p);
-            return Adult.isAdult(u) || redditUrlBlocked(u);
+            return Adult.isAdult(u) || redditUrlBlocked(u) || socialUrlBlocked(u);
         } catch (Throwable t) { return false; }
     }
 
@@ -313,8 +344,10 @@ public class GuardService extends AccessibilityService {
         return RedditGuard.isBlockedUrl(url);
     }
 
-    /** The adult community whose page is open in the Reddit app right now, or null. */
-    private String redditOpenAdult(AccessibilityNodeInfo root) {
+    private static final String SEARCH = "\u0000search";
+
+    /** What to close in the Reddit app right now: an adult community's name, SEARCH for an adult search, or null. */
+    private String redditHit(AccessibilityNodeInfo root, boolean record) {
         if (root == null) return null;
         ensureRedditList();
         android.graphics.Rect b = new android.graphics.Rect();
@@ -322,9 +355,11 @@ public class GuardService extends AccessibilityService {
         int h = Math.max(1, b.height() > 0 ? b.bottom : getResources().getDisplayMetrics().heightPixels);
         RedditGuard.Screen s = new RedditGuard.Screen();
         scanReddit(root, s, h, new int[]{250}, 0, b);
+        if (record) Diag.redditScreen(android.text.TextUtils.join(" \u00b7 ", s.probe));
         String name = s.openCommunity();
-        if (name != null) Diag.redditPages++;
-        return (name != null && RedditGuard.isAdultCommunity(name)) ? name : null;
+        if (name != null && record) Diag.redditPages++;
+        if (name != null && RedditGuard.isAdultCommunity(name)) return name;
+        return s.adultSearch() ? SEARCH : null;
     }
 
     /** Walks only the top of the screen (headers, buttons, Reddit's own 18+ gate), within a node budget. */
@@ -335,6 +370,11 @@ public class GuardService extends AccessibilityService {
         float y = b.top / (float) h;
         s.add(n.getText(), y);
         s.add(n.getContentDescription(), y);
+        if (n.isEditable() && y < 0.3f) s.field(n.getText(), n.isFocused());
+        s.probe(n.getText(), y);
+        s.probe(n.getContentDescription(), y);
+        String vid = n.getViewIdResourceName();
+        if (vid != null) { int k = vid.indexOf(":id/"); s.probe("#" + (k >= 0 ? vid.substring(k + 4) : vid), y); }
         for (int i = 0; i < n.getChildCount() && budget[0] > 0; i++) scanReddit(n.getChild(i), s, h, budget, depth + 1, b);
     }
 
@@ -342,7 +382,7 @@ public class GuardService extends AccessibilityService {
 
     private void checkReddit(AccessibilityNodeInfo root) {
         Diag.redditScans++;
-        final String name = redditOpenAdult(root);
+        final String name = redditHit(root, true);
         if (name == null) return;
         long now = android.os.SystemClock.uptimeMillis();
         if (name.equals(redditLast) && now - redditLastAt < 4000) return;     // one action per community per 4 s
@@ -350,7 +390,7 @@ public class GuardService extends AccessibilityService {
         while (!redditActs.isEmpty() && now - redditActs.peekFirst() > 20_000) redditActs.pollFirst();
         redditActs.addLast(now);
         final boolean loop = redditActs.size() >= 3;                          // Back is not getting out: go Home
-        Diag.redditClosed++;
+        if (name.equals(SEARCH)) Diag.redditSearches++; else Diag.redditClosed++;
         Overlay.cover(this, WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY, 4000, new Overlay.Work() {
             @Override public void run(final Runnable done) {
                 if (loop) { performGlobalAction(GLOBAL_ACTION_HOME); Diag.lastAction = "Reddit: went home"; h.postDelayed(done, 350); return; }
@@ -372,7 +412,7 @@ public class GuardService extends AccessibilityService {
         try {
             AccessibilityNodeInfo r = getRootInActiveWindow();
             if (r == null || r.getPackageName() == null || !RedditGuard.isRedditApp(r.getPackageName().toString())) return false;
-            return name.equals(redditOpenAdult(r));
+            return name.equals(redditHit(r, false));
         } catch (Throwable t) { return false; }
     }
 
@@ -522,7 +562,7 @@ public class GuardService extends AccessibilityService {
     private void shutDown() {
         alive = false;
         instance = null;
-        endIgSession();
+        endMeterSession();
         h.removeCallbacksAndMessages(null);
         if (rxOn) { try { unregisterReceiver(screenRx); } catch (Throwable ignored) {} rxOn = false; }
     }

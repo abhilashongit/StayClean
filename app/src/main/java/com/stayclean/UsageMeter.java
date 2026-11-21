@@ -46,6 +46,13 @@ public final class UsageMeter {
     /** Whole minutes left in the lockout, rounded up (for "Back in N min."). */
     public synchronized int lockoutMinutes(long now) { return (int) Math.max(1, (lockoutMs(now) + 59_999L) / 60_000L); }
 
+    /** Read-only: is the allowance used up for the interval running at now? (No time is credited.) */
+    public synchronized boolean lockedAt(long now) {
+        if (allow <= 0) return true;
+        if (start < 0 || now - start >= INTERVAL_MS) return false;
+        return used >= allow;
+    }
+
     /** Allowance left in the current interval. */
     public synchronized long remainingMs() { return Math.max(0, allow - used); }
 
