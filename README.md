@@ -10,7 +10,7 @@
 
 <p align="center">
   <img alt="Android 8.0+" src="https://img.shields.io/badge/Android-8.0%2B-000?logo=android&logoColor=white">
-  <img alt="Version 1.8" src="https://img.shields.io/badge/version-1.8-000">
+  <img alt="Version 1.9" src="https://img.shields.io/badge/version-1.9-000">
   <a href="https://github.com/abhilashongit/StayClean/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/abhilashongit/StayClean/total?label=downloads&color=000&labelColor=000"></a>
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-000">
   <img alt="No tracking" src="https://img.shields.io/badge/tracking-none-000">
@@ -39,6 +39,7 @@ When you open a blocked app, the screen fades to black, says **STAY CLEAN**, add
 | 🚫 | **Adult-site filter** | Close the tab quietly (Incognito included), then leave Chrome. No message, no trace. |
 | 🧭 | **Reddit, kept useful** | Adult communities close the moment they open, in the Reddit app or a browser. Ordinary communities, spoiler posts, profiles and your feed are left alone. In the app it steps back instead of closing Reddit. |
 | 🔎 | **Reddit search and Saved** | Searching adult words closes the search, in the Reddit app and in browsers. Saved pages on reddit.com close in browsers. |
+| 🏦 | **Bank Pass** | Banks and UPI apps flag any accessibility service as a risk. When one opens, Stay Clean switches itself off so the app works; when you leave, a notification brings protection back with one tap. On by default, no setup. Covers SuperMoney, Axis ONEApp and the common bank/UPI apps automatically. |
 | 🔋 | **Easy on battery** | Sleeps through the day, wakes before the night window. |
 | 🔒 | **Hard to undo on a whim** | Uninstall needs Device Admin removed first. This app's settings pages stay shut from 11 pm to 6 am. |
 
@@ -52,7 +53,7 @@ Times are fixed to **India Standard Time (UTC+5:30)**. Stay Clean also checks a 
 
 ## Install on Android (2 minutes)
 
-1. On your phone, open the **[latest release](https://github.com/abhilashongit/StayClean/releases/latest)** and download **`stay-clean-v1.8.apk`**. Already on an older version? Install it over the top. Your settings stay, and updates are never blocked (on v1.4 or older, update between 6 am and 11 pm IST).
+1. On your phone, open the **[latest release](https://github.com/abhilashongit/StayClean/releases/latest)** and download **`stay-clean-v1.9.apk`**. Already on an older version? Install it over the top. Your settings stay, and updates are never blocked (on v1.4 or older, update between 6 am and 11 pm IST).
 2. Open the file. If Android asks, allow your browser to *install unknown apps*.
 3. If **Play Protect** warns you, tap **More details → Install anyway**. This is normal for apps outside the Play Store that use Accessibility ([why](docs/INSTALL.md#why-play-protect-warns)).
 4. Open **Stay Clean** and finish the six **SETUP** rows, top to bottom. Do **Guard** last.

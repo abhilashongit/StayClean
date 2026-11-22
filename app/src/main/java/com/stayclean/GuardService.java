@@ -70,6 +70,7 @@ public class GuardService extends AccessibilityService {
             else registerReceiver(screenRx, f);
             rxOn = true;
         } catch (Throwable ignored) {}
+        if (BankGuard.isPaused(this)) { BankGuard.clearPaused(this); WatchdogService.cancelResume(this); }
         Util.applyPhase(this);
     }
 
@@ -83,7 +84,7 @@ public class GuardService extends AccessibilityService {
                     i.flags |= AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS
                             | AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
                             | AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
-                    i.packageNames = (p == Schedule.Phase.DAY) ? Targets.dayFilter() : null;
+                    i.packageNames = (p == Schedule.Phase.DAY && !BankGuard.enabled(this)) ? Targets.dayFilter() : null;
                     setServiceInfo(i);
                 }
                 applied = p;
@@ -92,10 +93,30 @@ public class GuardService extends AccessibilityService {
         kick();
     }
 
+    /** Re-evaluate the event filter now (e.g. the Bank Pass toggle changed). */
+    static void refilter() {
+        GuardService g = instance;
+        if (alive && g != null) { Schedule.Phase p = g.applied; g.applied = null; g.applyPhase(p == null ? Util.phaseNow(g) : p); }
+    }
+
+    /** A bank/UPI app is open: record it, keep the watchdog awake to notice when you leave, then switch off. */
+    private void pauseForBank(String pkg) {
+        if (BankGuard.isPaused(this)) { disableSelf(); return; }
+        BankGuard.markPaused(this, pkg);
+        Diag.bankPauses++;
+        Diag.lastAction = "Stepped aside for a bank app";
+        try {
+            Intent i = new Intent(this, WatchdogService.class).setAction(WatchdogService.ACTION_BANK_WATCH);
+            if (Build.VERSION.SDK_INT >= 26) startForegroundService(i); else startService(i);
+        } catch (Throwable ignored) {}
+        disableSelf();
+    }
+
     @Override public void onAccessibilityEvent(AccessibilityEvent e) {
         if (e == null || e.getPackageName() == null) return;
         String pkg = e.getPackageName().toString();
         if (pkg.equals(getPackageName())) return;
+        if (BankGuard.enabled(this) && BankGuard.isBank(this, pkg)) { pauseForBank(pkg); return; }
         lastPkg = pkg;
 
         if (Targets.isBlockedApp(pkg)) {                         // fastest path: no IPC, cover now

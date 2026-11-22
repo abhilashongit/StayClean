@@ -78,6 +78,7 @@ public class MainActivity extends Activity {
         col.addView(state);
 
         toggleRow(col);
+        bankRow(col);
         limitRow(col, Social.Svc.IG);
         limitRow(col, Social.Svc.X);
         TextView setup = Overlay.text(c, "SETUP", R.font.inter_medium, 11, GRAY, 0.2f);
@@ -178,6 +179,21 @@ public class MainActivity extends Activity {
         parent.addView(line, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
     }
 
+    /** Bank Pass: step aside automatically when a bank or UPI app opens. On by default. */
+    private void bankRow(LinearLayout parent) {
+        final Context c = this;
+        final boolean on = BankGuard.enabled(c);
+        LinearLayout r = baseRow(parent, "Bank Pass", on ? "Steps aside for bank & UPI apps" : "Off \u2014 banks may block Stay Clean",
+                on ? "On" : "Off", on);
+        r.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                BankGuard.setEnabled(c, !on);
+                GuardService.refilter();
+                render();
+            }
+        });
+    }
+
     /** Night lock for Instagram + X: switch on any time, off only between 6 am and 11 pm. */
     private void toggleRow(LinearLayout parent) {
         final Context c = this;
@@ -248,6 +264,7 @@ public class MainActivity extends Activity {
         if (Diag.redditScans > 0) s.append("\nReddit check: ").append(Diag.redditScans).append(" looks, ")
                 .append(Diag.redditPages).append(" community pages, ").append(Diag.redditClosed).append(" closed, ")
                 .append(Diag.redditSearches).append(" searches stopped");
+        if (Diag.bankPauses > 0) s.append("\nBank Pass: stepped aside ").append(Diag.bankPauses).append("x");
         if (!Diag.redditScreens.isEmpty()) s.append("\nReddit screens seen:").append(Diag.redditScreensText());
         if (Diag.morningShown > 0) s.append("\nMorning glow: shown ").append(Diag.morningShown).append("x");
         if (Diag.lastAction.length() > 0) s.append("\nLast close: ").append(Diag.lastAction);

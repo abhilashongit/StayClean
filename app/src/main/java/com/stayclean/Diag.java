@@ -25,6 +25,8 @@ public final class Diag {
         return b.toString();
     }
     public static volatile int redditSearches;
+    /** Bank Pass: times Stay Clean stepped aside for a bank app this run. */
+    public static volatile int bankPauses;
 
     public static void onBrowserRead(String pkg, boolean ok) {
         browserPkg = pkg;
