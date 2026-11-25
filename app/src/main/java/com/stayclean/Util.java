@@ -67,6 +67,7 @@ final class Util {
     static void setSocialOn(Context c, boolean on) {
         SOCIAL = on ? 1 : 0;
         c.getApplicationContext().getSharedPreferences("cfg", Context.MODE_PRIVATE).edit().putBoolean("social_on", on).apply();
+        Notes.armWindDown(c);
     }
 
     /** Toggle on AND inside 23:00 to 05:00 (stricter of the two clocks). */

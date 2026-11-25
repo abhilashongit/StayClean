@@ -28,6 +28,9 @@ public class WatchdogService extends Service {
     static final String ACTION_BANK_WATCH = "com.stayclean.BANK_WATCH";
     private static final int N_RESUME = 8;
     private boolean resumeShown;
+    private long lastRemind;
+    private static final long REMIND_EVERY_MS = 10 * 60_000L;
+    private android.content.BroadcastReceiver unlockRx;
     private final Handler h = new Handler(Looper.getMainLooper());
     private final FgTracker fg = new FgTracker();
     private long lastQuery;
@@ -37,6 +40,7 @@ public class WatchdogService extends Service {
     /** Cancel the "switch me back on" prompt (the guard is alive again). */
     static void cancelResume(Context c) {
         try { ((NotificationManager) c.getSystemService(NOTIFICATION_SERVICE)).cancel(N_RESUME); } catch (Throwable ignored) {}
+        try { new Handler(Looper.getMainLooper()).post(new Runnable() { @Override public void run() { ResumeCard.hide(); } }); } catch (Throwable ignored) {}
     }
 
     /** Check right now (the guard just stopped), without restarting the service. */
@@ -77,30 +81,45 @@ public class WatchdogService extends Service {
             boolean screenOff = pm != null && !pm.isInteractive();
             boolean leftBank = cur != null && !cur.isEmpty() && !cur.equals(bank) && !cur.equals(getPackageName());
             boolean timeout = System.currentTimeMillis() - BankGuard.pausedSince(WatchdogService.this) > 10 * 60_000L;
-            if (!resumeShown && (leftBank || screenOff || timeout)) { showResume(); resumeShown = true; }
+            boolean inBank = cur != null && BankGuard.isBank(WatchdogService.this, cur);
+            if (!resumeShown && (leftBank || screenOff || timeout)) {
+                resumeShown = true;
+                remind(!screenOff);
+            } else if (resumeShown && !screenOff && !inBank
+                    && System.currentTimeMillis() - lastRemind >= REMIND_EVERY_MS) {
+                remind(true);
+            }
         } catch (Throwable ignored) {}
         return resumeShown ? 5_000 : 1_500;
     }
 
-    private void showResume() {
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= 26)
-            nm.createNotificationChannel(new NotificationChannel(CH_RESUME, "Resume protection", NotificationManager.IMPORTANCE_HIGH));
-        Intent s = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        String comp = getPackageName() + "/" + GuardService.class.getName();   // scroll to & highlight Stay Clean (AOSP/Samsung)
-        android.os.Bundle args = new android.os.Bundle();
-        args.putString(":settings:fragment_args_key", comp);
-        s.putExtra(":settings:fragment_args_key", comp);
-        s.putExtra(":settings:show_fragment_args", args);
-        PendingIntent pi = PendingIntent.getActivity(this, 1, s, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification n = new Notification.Builder(this, CH_RESUME)
-                .setSmallIcon(R.drawable.ic_stat)
-                .setContentTitle("Protection is paused")
-                .setContentText("Tap to switch Stay Clean back on.")
-                .setOngoing(true)
-                .setContentIntent(pi)
-                .build();
-        nm.notify(N_RESUME, n);
+    /** A fresh, gentle nudge: the notification re-alerts with a new line, and (card) the calm card rises. */
+    private void remind(boolean card) {
+        lastRemind = System.currentTimeMillis();
+        String text = ResumeCard.line();
+        try {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            NotificationChannel ch = new NotificationChannel(CH_RESUME, "Resume protection", NotificationManager.IMPORTANCE_HIGH);
+            ch.setSound(null, (android.media.AudioAttributes) null);
+            ch.enableVibration(true);
+            ch.setVibrationPattern(new long[]{0, 35, 90, 35});
+            nm.createNotificationChannel(ch);
+            PendingIntent pi = PendingIntent.getActivity(this, 1, ResumeCard.switchIntent(this),
+                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+            Notification n = new Notification.Builder(this, CH_RESUME)
+                    .setSmallIcon(R.drawable.ic_stat)
+                    .setContentTitle("Stay Clean is paused")
+                    .setContentText(text)
+                    .setStyle(new Notification.BigTextStyle().bigText(text))
+                    .setColor(0xFFE8A15A)
+                    .setOngoing(true)
+                    .setOnlyAlertOnce(false)
+                    .setContentIntent(pi)
+                    .addAction(new Notification.Action.Builder(null, "Switch back on", pi).build())
+                    .build();
+            nm.notify(N_RESUME, n);
+        } catch (Throwable ignored) {}
+        if (card) { try { ResumeCard.show(this, text); } catch (Throwable ignored) {} }
     }
 
     @Override public void onCreate() {
@@ -108,6 +127,17 @@ public class WatchdogService extends Service {
         running = true;
         self = this;
         goForeground();
+        unlockRx = new android.content.BroadcastReceiver() {
+            @Override public void onReceive(Context c, Intent i) {
+                try {
+                    if (!BankGuard.isPaused(WatchdogService.this) || !resumeShown) return;
+                    updateForeground();
+                    if (BankGuard.isBank(WatchdogService.this, fg.current())) return;   // never interrupt banking
+                    remind(true);
+                } catch (Throwable ignored) {}
+            }
+        };
+        try { registerReceiver(unlockRx, new android.content.IntentFilter(Intent.ACTION_USER_PRESENT)); } catch (Throwable ignored) {}
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
@@ -143,6 +173,7 @@ public class WatchdogService extends Service {
         final String pkg = fg.current();
         boolean food = Targets.isBlockedApp(pkg) && Util.blockedNow(this);
         boolean social = Targets.isSocialApp(pkg) && Util.socialNightNow(this);
+        if (social && Emergency.allowsNow(this)) { social = Emergency.sample(this, true) <= 0; } else Emergency.idle(this);
         if (!food && !social) return;
         if (e == Targets.Enforcer.FALLBACK_OVERLAY) {
             Overlay.show(this, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, pkg, new Runnable() {
@@ -188,6 +219,8 @@ public class WatchdogService extends Service {
     }
 
     @Override public void onDestroy() {
+        try { if (unlockRx != null) unregisterReceiver(unlockRx); } catch (Throwable ignored) {}
+        ResumeCard.hide();
         running = false;
         self = null;
         h.removeCallbacks(tick);

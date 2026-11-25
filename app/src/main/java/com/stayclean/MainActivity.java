@@ -36,6 +36,7 @@ public class MainActivity extends Activity {
     @Override protected void onResume() {
         super.onResume();
         if (limitSheet != null) limitSheet.abort();     // the screen is rebuilt below
+        Notes.armWindDown(this);
         render();
     }
 
@@ -81,6 +82,7 @@ public class MainActivity extends Activity {
         bankRow(col);
         limitRow(col, Social.Svc.IG);
         limitRow(col, Social.Svc.X);
+        emergencyRow(col);
         TextView setup = Overlay.text(c, "SETUP", R.font.inter_medium, 11, GRAY, 0.2f);
         setup.setGravity(Gravity.START);
         ((LinearLayout.LayoutParams) setup.getLayoutParams()).topMargin = Overlay.dp(c, 28);
@@ -177,6 +179,40 @@ public class MainActivity extends Activity {
         View line = new View(c);
         line.setBackgroundColor(Color.rgb(28, 28, 28));
         parent.addView(line, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+    }
+
+    private long emgArmedUntil;
+
+    /** Emergency access: 5 minutes for the night, Instagram and X together. Two taps to start, on purpose. */
+    private void emergencyRow(LinearLayout parent) {
+        final Context c = this;
+        final boolean on = Emergency.allowsNow(c);
+        final boolean can = Emergency.canStart(c);
+        long left = Emergency.remainingMs(c);
+        boolean night = Util.socialNightNow(c);
+        String desc, right;
+        if (on) { desc = "Running \u00b7 Instagram and X, together"; right = Emergency.clock(left) + " left"; }
+        else if (night && left <= 0) { desc = "Used for tonight. Rest well."; right = "Used"; }
+        else if (night) {
+            boolean armed = android.os.SystemClock.uptimeMillis() < emgArmedUntil;
+            desc = armed ? "Tap again to start. It counts only while open." : Emergency.clock(left) + " for the night, shared";
+            right = armed ? "Confirm" : "Start";
+        } else { desc = "5 minutes during quiet hours, Instagram and X together"; right = "From 11 pm"; }
+        LinearLayout r = baseRow(parent, "Emergency access", desc, right, on || (night && can));
+        r.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                if (on || !Emergency.canStart(c)) return;
+                if (android.os.SystemClock.uptimeMillis() < emgArmedUntil) {
+                    Emergency.start(c);
+                    emgArmedUntil = 0;
+                    try { v.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM); } catch (Throwable ignored) {}
+                } else {
+                    emgArmedUntil = android.os.SystemClock.uptimeMillis() + 4_000;
+                    v.postDelayed(new Runnable() { @Override public void run() { render(); } }, 4_100);
+                }
+                render();
+            }
+        });
     }
 
     /** Bank Pass: step aside automatically when a bank or UPI app opens. On by default. */

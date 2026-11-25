@@ -59,6 +59,8 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".WindDownReceiver" android:exported="false" />
+
         <receiver
             android:name=".AdminReceiver"
             android:exported="true"

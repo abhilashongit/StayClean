@@ -128,6 +128,7 @@ public class GuardService extends AccessibilityService {
         }
         if (Targets.isSocialApp(pkg) && Util.socialNightNow(this)) {
             if (applied != Schedule.Phase.ACTIVE) Util.applyPhase(this);
+            if (Emergency.allowsNow(this)) { kick(); return; }          // emergency access: open, and counting
             enforce(pkg, Phrases.SOCIAL.next());
             return;
         }
@@ -152,7 +153,7 @@ public class GuardService extends AccessibilityService {
         long idle = (blocked || social) ? NIGHT_IDLE_MS : -1;
 
         // Screen off: stop entirely. The SCREEN_ON / USER_PRESENT receiver wakes us the moment it matters.
-        if (!interactive()) { endMeterSession(); return -1; }
+        if (!interactive()) { endMeterSession(); Emergency.idle(this); return -1; }
         AccessibilityNodeInfo root = getRootInActiveWindow();
         String pkg = (root != null && root.getPackageName() != null) ? root.getPackageName().toString() : null;
         if (pkg == null || pkg.equals(getPackageName())) {
@@ -165,7 +166,18 @@ public class GuardService extends AccessibilityService {
         boolean busy = Overlay.busy();
 
         if (blocked && Targets.isBlockedApp(pkg)) { if (!busy) enforce(pkg, null); return NIGHT_IDLE_MS; }
-        if (social && Targets.isSocialApp(pkg)) { if (!busy) enforce(pkg, Phrases.SOCIAL.next()); return NIGHT_IDLE_MS; }
+        boolean socialWeb = Targets.isBrowser(pkg);
+        if (social && !Targets.isSocialApp(pkg) && !socialWeb) Emergency.idle(this);
+        if (social && Targets.isSocialApp(pkg)) {
+            if (Emergency.allowsNow(this)) {
+                long left = Emergency.sample(this, true);
+                if (left > 0) return Math.min(1_000, left + 50);
+                if (!busy) enforce(pkg, "Emergency time is used up. Rest well.");
+                return NIGHT_IDLE_MS;
+            }
+            if (!busy) enforce(pkg, Phrases.SOCIAL.next());
+            return NIGHT_IDLE_MS;
+        }
 
         Social.Svc app = Social.ofApp(pkg);
         if (app != null) {
@@ -183,11 +195,18 @@ public class GuardService extends AccessibilityService {
             long poll = up < fastUntil ? BROWSER_FAST_POLL_MS : BROWSER_SLOW_POLL_MS;
             Social.Svc web = Social.ofUrl(url);
             if (url != null && meterSvc != null && web != meterSvc) endMeterSession();   // left the site (or switched)
+            if (social && url != null && web == null) Emergency.idle(this);
             if (!busy && Adult.isAdult(url)) closeAdult(pkg, Adult.hostOf(url));
             else if (!busy && redditUrlBlocked(url)) closeAdult(pkg, Adult.hostOf(url));
             else if (web != null && !busy) {
                 // instagram.com / x.com: closed at night, and timed into the same allowance as the app by day
-                if (social) { Diag.lastAction = web.label + " website: night lock"; closeAdult(pkg, Adult.hostOf(url)); return poll; }
+                if (social) {
+                    if (Emergency.allowsNow(this)) {
+                        long left = Emergency.sample(this, true);
+                        if (left > 0) return Math.min(poll, left + 50);
+                    }
+                    Diag.lastAction = web.label + " website: night lock"; closeAdult(pkg, Adult.hostOf(url)); return poll;
+                }
                 long wait = meterTick(web);
                 if (wait < 0) { Diag.lastAction = web.label + " website: time used"; closeAdult(pkg, Adult.hostOf(url)); return poll; }
                 return Math.min(poll, wait);
@@ -246,7 +265,8 @@ public class GuardService extends AccessibilityService {
     private boolean socialUrlBlocked(String url) {
         Social.Svc svc = Social.ofUrl(url);
         if (svc == null) return false;
-        return Util.socialNightNow(this) || Util.meter(this, svc).lockedAt(Util.meterNow(this));
+        if (Util.socialNightNow(this)) return !Emergency.allowsNow(this) || Emergency.remainingMs(this) <= 0;
+        return Util.meter(this, svc).lockedAt(Util.meterNow(this));
     }
 
     // ---------- adult sites: silent. Black screen, close the TAB through Chrome's own UI, then Home, then kill ----------
